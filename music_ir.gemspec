@@ -5,7 +5,7 @@ require 'music_ir/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "music_ir"
-  gem.version       = MusicIr::VERSION
+  gem.version       = MusicIR::VERSION
   gem.authors       = ["Jim Lindstrom"]
   gem.email         = ["jim.lindstrom@gmail.com"]
   gem.description   = %q{TODO: Write a gem description}
