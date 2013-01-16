@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'portmidi'
-
 module MusicIR
 
   class OutPort

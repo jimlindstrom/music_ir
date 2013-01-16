@@ -1,7 +1,5 @@
 #!/usr/bin/midi
 
-require 'portmidi'
-
 module MusicIR
 
   class InPort

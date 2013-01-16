@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Music::Phrase do
+describe MusicIR::Phrase do
   before(:each) do
     @vector = $phrasing_vectors["Bring back my bonnie to me"]
     @nq = @vector[:note_queue]
@@ -10,25 +10,25 @@ describe Music::Phrase do
 
   describe ".new" do
     it "should take a note queue, a start (note) index and an end (note) index" do
-      Music::Phrase.new(@nq, idx1=2, idx2=8).should be_an_instance_of Music::Phrase
+      MusicIR::Phrase.new(@nq, idx1=2, idx2=8).should be_an_instance_of MusicIR::Phrase
     end
     it "should raise an error if the indices are out of bounds" do
-      expect { Music::Phrase.new(@nq, idx1=-1, idx2=8) }.to raise_error
+      expect { MusicIR::Phrase.new(@nq, idx1=-1, idx2=8) }.to raise_error
     end
     it "should raise an error if the indices are out of bounds" do
-      expect { Music::Phrase.new(@nq, idx1=1, idx2=nq.length) }.to raise_error
+      expect { MusicIR::Phrase.new(@nq, idx1=1, idx2=nq.length) }.to raise_error
     end
     it "should raise an error if the indices are out of order" do
-      expect { Music::Phrase.new(@nq, idx1=5, idx2=3) }.to raise_error
+      expect { MusicIR::Phrase.new(@nq, idx1=5, idx2=3) }.to raise_error
     end
   end
 
   describe ".notes" do
     before(:each) do
-      @p = Music::Phrase.new(@nq, @idx1=2, @idx2=8)
+      @p = MusicIR::Phrase.new(@nq, @idx1=2, @idx2=8)
     end
     it "should return a note_queue" do
-      @p.notes.should be_an_instance_of Music::NoteQueue
+      @p.notes.should be_an_instance_of MusicIR::NoteQueue
     end
     it "should return the notes included in this phrase" do
       expected_notes = @nq[@idx1..@idx2].collect{ |n| [ n.pitch.val, n.duration.val ] }
@@ -38,7 +38,7 @@ describe Music::Phrase do
 
   describe ".duration" do
     before(:each) do
-      @p = Music::Phrase.new(@nq, @idx1=2, @idx2=8)
+      @p = MusicIR::Phrase.new(@nq, @idx1=2, @idx2=8)
     end
     it "should return the sum of the duration of the individual notes" do
       expected_duration = @nq[@idx1..@idx2].inject(0.0){ |x,s| x + s.duration.val }
@@ -48,7 +48,7 @@ describe Music::Phrase do
 
   describe ".length" do
     before(:each) do
-      @p = Music::Phrase.new(@nq, @idx1=2, @idx2=8)
+      @p = MusicIR::Phrase.new(@nq, @idx1=2, @idx2=8)
     end
     it "should return the number of individual notes" do
       expected_length = Array(@idx1..@idx2).length
@@ -59,7 +59,7 @@ describe Music::Phrase do
   describe ".score" do
     before(:each) do
       @nq.analyze!
-      @p = Music::Phrase.new(@nq, @idx1=2, @idx2=8)
+      @p = MusicIR::Phrase.new(@nq, @idx1=2, @idx2=8)
     end
     it "should return a floating point value" do
       @p.score.should be_an_instance_of Float
@@ -72,17 +72,17 @@ describe Music::Phrase do
     end
     context "for phrases with 0 or 1 notes" do
       it "should raise an error" do
-        @one_note_phrase = Music::Phrase.new(@nq, idx1=2, idx2=2)
+        @one_note_phrase = MusicIR::Phrase.new(@nq, idx1=2, idx2=2)
         expect { @one_note_phrase.split_at_a_big_interval }.to raise_error
       end
     end
     context "for phrases with 2 or more notes" do
       before(:each) do
-        @two_note_phrase = Music::Phrase.new(@nq, idx1=2, idx2=3)
-        @six_note_phrase = Music::Phrase.new(@nq, idx1=2, idx2=7)
+        @two_note_phrase = MusicIR::Phrase.new(@nq, idx1=2, idx2=3)
+        @six_note_phrase = MusicIR::Phrase.new(@nq, idx1=2, idx2=7)
       end
       it "should return a new phrase" do
-        @two_note_phrase.split_at_a_big_interval.should be_an_instance_of Music::Phrase
+        @two_note_phrase.split_at_a_big_interval.should be_an_instance_of MusicIR::Phrase
       end
       it "should decrement its own ending index by at least 1" do
         old_end_idx = @two_note_phrase.end_idx

@@ -2,20 +2,20 @@
 
 require 'spec_helper'
 
-describe Music::Note do
+describe MusicIR::Note do
   before do
   end
 
   context "new" do
     it "should take a pitch and a duration" do
-      Music::Note.new(Music::Pitch.new(0), Music::Duration.new(0)).should be_an_instance_of Music::Note
+      MusicIR::Note.new(MusicIR::Pitch.new(0), MusicIR::Duration.new(0)).should be_an_instance_of MusicIR::Note
     end
   end
 
   context "pitch" do
     it "should return the pitch it was created with" do
       pitch_val = 10
-      n = Music::Note.new(Music::Pitch.new(pitch_val), Music::Duration.new(0))
+      n = MusicIR::Note.new(MusicIR::Pitch.new(pitch_val), MusicIR::Duration.new(0))
       n.pitch.val.should be pitch_val
     end
   end
@@ -23,14 +23,14 @@ describe Music::Note do
   context "duration" do
     it "should return the duration it was created with" do
       duration_val = 10
-      n = Music::Note.new(Music::Pitch.new(0), Music::Duration.new(duration_val))
+      n = MusicIR::Note.new(MusicIR::Pitch.new(0), MusicIR::Duration.new(duration_val))
       n.duration.val.should be duration_val
     end
   end
 
   context "analysis" do
     it "should return a hash that can be extended with whatever values critics want" do
-      n = Music::Note.new(Music::Pitch.new(0), Music::Duration.new(3))
+      n = MusicIR::Note.new(MusicIR::Pitch.new(0), MusicIR::Duration.new(3))
       n.analysis.should be_an_instance_of Hash
     end
   end

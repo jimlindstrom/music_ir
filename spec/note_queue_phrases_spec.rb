@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Music::NoteQueue do
+describe MusicIR::NoteQueue do
 
   before(:each) do
   end
@@ -25,12 +25,12 @@ describe Music::NoteQueue do
     end
     context "when the note queue contains rests" do
       before(:each) do
-        @nq = Music::NoteQueue.new
+        @nq = MusicIR::NoteQueue.new
         @nq.tempo = 100
-        @nq.push Music::Note.new(Music::Pitch.new(1), Music::Duration.new(1))
-        @nq.push Music::Note.new(Music::Pitch.new(2), Music::Duration.new(4))
-        @nq.push Music::Rest.new(                     Music::Duration.new(3))
-        @nq.push Music::Note.new(Music::Pitch.new(3), Music::Duration.new(2))
+        @nq.push MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
+        @nq.push MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(4))
+        @nq.push MusicIR::Rest.new(                     MusicIR::Duration.new(3))
+        @nq.push MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
       end
       it "returns false" do
         @nq.detect_phrases.should == false

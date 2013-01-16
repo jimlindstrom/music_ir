@@ -10,7 +10,7 @@ module MusicIR
   
     def self.from_event_queue(evq)
       iois = evq.get_interonset_intervals + [ evq.get_last_duration ]
-      ioi_array = MusicIR:IOIArray.new(iois.dup)
+      ioi_array = MusicIR::IOIArray.new(iois.dup)
       q_ret = ioi_array.quantize!
   
       notes = NoteQueue.new
@@ -48,18 +48,18 @@ module MusicIR
 
       duration_to_timestamp = 60.0 / @tempo * 200.0
   
-      eq = MusicIR:EventQueue.new
+      eq = MusicIR::EventQueue.new
       timestamp = 0
       self.each do |note|
         case note
           when Music::Note
-            eq.enqueue MusicIR:NoteOnEvent.new({
+            eq.enqueue MusicIR::NoteOnEvent.new({
                          :pitch     => note.pitch.val,
                          :velocity  => 100,
                          :timestamp => timestamp })
       
             timestamp += note.duration.val * duration_to_timestamp
-            eq.enqueue MusicIR:NoteOffEvent.new({
+            eq.enqueue MusicIR::NoteOffEvent.new({
                          :pitch     => note.pitch.val,
                          :velocity  => 100,
                          :timestamp => timestamp })

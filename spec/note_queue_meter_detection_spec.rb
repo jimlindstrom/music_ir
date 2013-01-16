@@ -2,28 +2,28 @@
 
 require 'spec_helper'
 
-describe Music::NoteQueue do
+describe MusicIR::NoteQueue do
 
   before(:each) do
   end
 
   describe ".beat_array" do
     before(:each) do
-      @nq = Music::NoteQueue.new
+      @nq = MusicIR::NoteQueue.new
       @nq.tempo = 100
-      @nq.push Music::Note.new(Music::Pitch.new(1), Music::Duration.new(1))
-      @nq.push Music::Note.new(Music::Pitch.new(2), Music::Duration.new(4))
-      @nq.push Music::Note.new(Music::Pitch.new(3), Music::Duration.new(2))
+      @nq.push MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
+      @nq.push MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(4))
+      @nq.push MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
     end
     it "returns an array containing one element per beat" do
       @nq.beat_array.length.should == (1+4+2)
     end
     it "returns an array containing Beats where there are note onsets" do
-      @nq.beat_array[0+1+4].should be_an_instance_of Music::Beat
+      @nq.beat_array[0+1+4].should be_an_instance_of MusicIR::Beat
     end
     it "returns an array containing Beats where there are rest onsets" do
-      @nq.push Music::Rest.new(Music::Duration.new(2))
-      @nq.beat_array[0+1+4+2].should be_an_instance_of Music::Beat
+      @nq.push MusicIR::Rest.new(MusicIR::Duration.new(2))
+      @nq.beat_array[0+1+4+2].should be_an_instance_of MusicIR::Beat
     end
     it "returns an array containing nils where there aren't note onsets" do
       @nq.beat_array[0+2].nil?.should be_true
@@ -53,12 +53,12 @@ describe Music::NoteQueue do
     end
     context "when the note queue is metrically clear and contains notes and rests" do
       before(:each) do
-        @nq = Music::NoteQueue.new
+        @nq = MusicIR::NoteQueue.new
         @nq.tempo = 100
         5.times do
-          @nq.push Music::Note.new(Music::Pitch.new(1), Music::Duration.new(3))
-          @nq.push Music::Note.new(Music::Pitch.new(3), Music::Duration.new(2))
-          @nq.push Music::Rest.new(                     Music::Duration.new(1))
+          @nq.push MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(3))
+          @nq.push MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
+          @nq.push MusicIR::Rest.new(                     MusicIR::Duration.new(1))
         end
       end
       it "returns true" do

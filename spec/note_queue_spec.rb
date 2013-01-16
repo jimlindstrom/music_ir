@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe Music::NoteQueue do
+describe MusicIR::NoteQueue do
 
   before(:each) do
   end
 
   describe ".tempo" do
     it "can be read and written" do
-      nq = Music::NoteQueue.new
+      nq = MusicIR::NoteQueue.new
       nq.tempo = 250
       nq.tempo.should == 250
     end
@@ -18,22 +18,22 @@ describe Music::NoteQueue do
   describe ".to_event_queue" do
     context "if tempo has been set" do
       before(:each) do
-        @nq = Music::NoteQueue.new
+        @nq = MusicIR::NoteQueue.new
         @nq.tempo = 100
       end
       it "returns a EventQueue" do
-        @nq.to_event_queue.should be_an_instance_of Midi::EventQueue
+        @nq.to_event_queue.should be_an_instance_of MusicIR::EventQueue
       end
       context "if it contains notes, and possibly rests" do
         before(:each) do
-          @nq.push Music::Note.new(Music::Pitch.new(1), Music::Duration.new(1))
-          @nq.push Music::Note.new(Music::Pitch.new(2), Music::Duration.new(4))
-          @nq.push Music::Rest.new(                     Music::Duration.new(3))
-          @nq.push Music::Note.new(Music::Pitch.new(3), Music::Duration.new(2))
+          @nq.push MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
+          @nq.push MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(4))
+          @nq.push MusicIR::Rest.new(                     MusicIR::Duration.new(3))
+          @nq.push MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
           @eq = @nq.to_event_queue
         end
         it "converts each note (not rest) into a note_on / note_off pair" do
-          @eq.map{ |x| x.message }.should == [Midi::Event::NOTE_ON, Midi::Event::NOTE_OFF]*3
+          @eq.map{ |x| x.message }.should == [MusicIR::Event::NOTE_ON, MusicIR::Event::NOTE_OFF]*3
         end
         it "gives each note_on/note_off the right pitch" do
           @eq.map{ |x| x.pitch }.should == [1,1, 2,2, 3,3]
@@ -54,7 +54,7 @@ describe Music::NoteQueue do
     end
     context "if tempo has not been set" do
       it "raises an error" do
-        @nq = Music::NoteQueue.new
+        @nq = MusicIR::NoteQueue.new
         expect { @nq.to_event_queue }.to raise_error(ArgumentError)
       end
     end
@@ -72,22 +72,22 @@ describe Music::NoteQueue do
   describe ".from_event_queue" do
     before (:all) do
       @test_events = [
-        Midi::NoteOnEvent.new( { :pitch => 40, :velocity => 100, :timestamp => 1000 }),
-        Midi::NoteOffEvent.new({ :pitch => 40, :velocity => 100, :timestamp => 2000 }),
+        MusicIR::NoteOnEvent.new( { :pitch => 40, :velocity => 100, :timestamp => 1000 }),
+        MusicIR::NoteOffEvent.new({ :pitch => 40, :velocity => 100, :timestamp => 2000 }),
   
-        Midi::NoteOnEvent.new( { :pitch => 42, :velocity => 100, :timestamp => 2000 }),
-        Midi::NoteOffEvent.new({ :pitch => 42, :velocity => 100, :timestamp => 3000 }),
+        MusicIR::NoteOnEvent.new( { :pitch => 42, :velocity => 100, :timestamp => 2000 }),
+        MusicIR::NoteOffEvent.new({ :pitch => 42, :velocity => 100, :timestamp => 3000 }),
   
-        Midi::NoteOnEvent.new( { :pitch => 44, :velocity => 100, :timestamp => 3000 }),
-        Midi::NoteOffEvent.new({ :pitch => 44, :velocity => 100, :timestamp => 4000 }) ]
+        MusicIR::NoteOnEvent.new( { :pitch => 44, :velocity => 100, :timestamp => 3000 }),
+        MusicIR::NoteOffEvent.new({ :pitch => 44, :velocity => 100, :timestamp => 4000 }) ]
 
-      @evq = Midi::EventQueue.new
+      @evq = MusicIR::EventQueue.new
       @test_events.each { |e| @evq.enqueue e }
-      @nq = Music::NoteQueue.from_event_queue(@evq)
+      @nq = MusicIR::NoteQueue.from_event_queue(@evq)
     end
 
     it "returns a NoteQueue" do
-      @nq.class.should == Music::NoteQueue
+      @nq.class.should == MusicIR::NoteQueue
     end
     it "converts the event queue into notes with the correct pitches" do
       @nq.map { |x| x.pitch.val }.should == [40, 42, 44]
@@ -102,24 +102,24 @@ describe Music::NoteQueue do
     context "if there are gaps in the quantized durations" do
       before(:all) do
         @test_events_with_gap = [
-          Midi::NoteOnEvent.new( { :pitch => 40, :velocity => 100, :timestamp => 1000 }),
-          Midi::NoteOffEvent.new({ :pitch => 40, :velocity => 100, :timestamp => 2000 }),
+          MusicIR::NoteOnEvent.new( { :pitch => 40, :velocity => 100, :timestamp => 1000 }),
+          MusicIR::NoteOffEvent.new({ :pitch => 40, :velocity => 100, :timestamp => 2000 }),
     
-          Midi::NoteOnEvent.new( { :pitch => 42, :velocity => 100, :timestamp => 2000 }),
-          Midi::NoteOffEvent.new({ :pitch => 42, :velocity => 100, :timestamp => 3000 }),
+          MusicIR::NoteOnEvent.new( { :pitch => 42, :velocity => 100, :timestamp => 2000 }),
+          MusicIR::NoteOffEvent.new({ :pitch => 42, :velocity => 100, :timestamp => 3000 }),
     
-          Midi::NoteOnEvent.new( { :pitch => 44, :velocity => 100, :timestamp => 4000 }),
-          Midi::NoteOffEvent.new({ :pitch => 44, :velocity => 100, :timestamp => 5000 }),
+          MusicIR::NoteOnEvent.new( { :pitch => 44, :velocity => 100, :timestamp => 4000 }),
+          MusicIR::NoteOffEvent.new({ :pitch => 44, :velocity => 100, :timestamp => 5000 }),
     
-          Midi::NoteOnEvent.new( { :pitch => 45, :velocity => 100, :timestamp => 5000 }),
-          Midi::NoteOffEvent.new({ :pitch => 45, :velocity => 100, :timestamp => 6000 }) ]
+          MusicIR::NoteOnEvent.new( { :pitch => 45, :velocity => 100, :timestamp => 5000 }),
+          MusicIR::NoteOffEvent.new({ :pitch => 45, :velocity => 100, :timestamp => 6000 }) ]
       end
       it "inserts rests where there are gaps" do
-        evq = Midi::EventQueue.new
+        evq = MusicIR::EventQueue.new
         @test_events_with_gap.each { |e| evq.enqueue e }
-        nq = Music::NoteQueue.from_event_queue(evq)
+        nq = MusicIR::NoteQueue.from_event_queue(evq)
   
-        nq.map { |x| x.class }.should == [Music::Note, Music::Note, Music::Rest, Music::Note, Music::Note]
+        nq.map { |x| x.class }.should == [MusicIR::Note, MusicIR::Note, MusicIR::Rest, MusicIR::Note, MusicIR::Note]
       end
     end
   end

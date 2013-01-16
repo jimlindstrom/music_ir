@@ -6,21 +6,21 @@ shared_examples "scores correctly" do |vector, incorrect_phrases|
   it "scores correctly" do
     nq = vector[:note_queue]
     nq.analyze!
-    correct_phrase_list = Music::PhraseList.new(nq)
+    correct_phrase_list = MusicIR::PhraseList.new(nq)
     vector[:phrase_boundaries].each do |p|
-      correct_phrase_list.push Music::Phrase.new(nq, p[:start_idx], p[:end_idx])
+      correct_phrase_list.push MusicIR::Phrase.new(nq, p[:start_idx], p[:end_idx])
     end
 
-    incorrect_phrase_list = Music::PhraseList.new(nq)
+    incorrect_phrase_list = MusicIR::PhraseList.new(nq)
     incorrect_phrases.each do |start_idx, end_idx|
-      incorrect_phrase_list.push Music::Phrase.new(nq, start_idx, end_idx)
+      incorrect_phrase_list.push MusicIR::Phrase.new(nq, start_idx, end_idx)
     end
 
     incorrect_phrase_list.score.should be < correct_phrase_list.score
   end
 end
 
-describe Music::PhraseList do
+describe MusicIR::PhraseList do
   before do
   end
 
@@ -28,7 +28,7 @@ describe Music::PhraseList do
     it "should take a note queue" do
       vector = $phrasing_vectors["Bring back my bonnie to me"]
       nq = vector[:note_queue]
-      Music::PhraseList.new(nq).should be_an_instance_of Music::PhraseList
+      MusicIR::PhraseList.new(nq).should be_an_instance_of MusicIR::PhraseList
     end
   end
 
@@ -38,10 +38,10 @@ describe Music::PhraseList do
       @nq = vector[:note_queue]
     end
     it "should return a phrase list" do
-      Music::PhraseList.initial(@nq).should be_an_instance_of Music::PhraseList
+      MusicIR::PhraseList.initial(@nq).should be_an_instance_of MusicIR::PhraseList
     end
     it "should contain at least one phrase" do
-      pl = Music::PhraseList.initial(@nq)
+      pl = MusicIR::PhraseList.initial(@nq)
       pl.length.should be >= 1
     end
   end
@@ -52,11 +52,11 @@ describe Music::PhraseList do
       @nq = vector[:note_queue]
     end
     it "returns an equivalent Phrase_list" do
-      pl = Music::PhraseList.initial(@nq)
+      pl = MusicIR::PhraseList.initial(@nq)
       pl.clone.to_s.should == pl.to_s
     end
     it "returns a new PhraseList (not the same one)" do
-      pl = Music::PhraseList.initial(@nq)
+      pl = MusicIR::PhraseList.initial(@nq)
       pl.clone.should_not be pl
     end
   end
@@ -66,7 +66,7 @@ describe Music::PhraseList do
       @vector = $phrasing_vectors["Bring back my bonnie to me"]
       @nq = @vector[:note_queue]
       @nq.analyze!
-      pl = Music::PhraseList.initial(@nq)
+      pl = MusicIR::PhraseList.initial(@nq)
       pl.score.should be_an_instance_of Float
     end
 
