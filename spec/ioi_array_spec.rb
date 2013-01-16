@@ -56,7 +56,7 @@ describe MusicIR::IOIArray do
     it "properly quantizes 'good king wencelis'" do
       events = $qioi_vectors["good king wencelis"][:events]
       @iois = []
-      events.select { |x, y| x.message==MusicIR::Event::NOTE_ON }.each_cons(2) do |x, y|
+      events.select { |x, y| x.message==MusicIR::MidiEvent::NOTE_ON }.each_cons(2) do |x, y|
         @iois.push y.timestamp - x.timestamp
       end
       @iois = MusicIR::IOIArray.new(@iois)
@@ -70,7 +70,7 @@ describe MusicIR::IOIArray do
     it "properly quantizes 'old macdonald had a farm'" do
       events = $qioi_vectors["old macdonald had a farm"][:events]
       @iois = []
-      events.select { |x, y| x.message==MusicIR::Event::NOTE_ON }.each_cons(2) do |x, y|
+      events.select { |x, y| x.message==MusicIR::MidiEvent::NOTE_ON }.each_cons(2) do |x, y|
         @iois.push y.timestamp - x.timestamp
       end
       @iois = MusicIR::IOIArray.new(@iois)
@@ -84,7 +84,7 @@ describe MusicIR::IOIArray do
     it "properly quantizes 'mary had a little lamb'" do
       events = $qioi_vectors["mary had a little lamb"][:events]
       @iois = []
-      events.select { |x, y| x.message==MusicIR::Event::NOTE_ON }.each_cons(2) do |x, y|
+      events.select { |x, y| x.message==MusicIR::MidiEvent::NOTE_ON }.each_cons(2) do |x, y|
         @iois.push y.timestamp - x.timestamp
       end
       @iois = MusicIR::IOIArray.new(@iois)

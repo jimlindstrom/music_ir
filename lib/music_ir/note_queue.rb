@@ -52,7 +52,7 @@ module MusicIR
       timestamp = 0
       self.each do |note|
         case note
-          when Music::Note
+          when MusicIR::Note
             eq.enqueue MusicIR::NoteOnEvent.new({
                          :pitch     => note.pitch.val,
                          :velocity  => 100,
@@ -63,7 +63,7 @@ module MusicIR
                          :pitch     => note.pitch.val,
                          :velocity  => 100,
                          :timestamp => timestamp })
-          when Music::Rest
+          when MusicIR::Rest
             timestamp += note.duration.val * duration_to_timestamp
           else
             raise RuntimeError.new("unexpected class: #{note.class}")
@@ -78,7 +78,7 @@ module MusicIR
       beats = []
       prev = nil
       self.each do |note|
-        b = Music::Beat.new
+        b = MusicIR::Beat.new
         b.prev_note = prev
         b.cur_note = note
         beats.push b
@@ -112,11 +112,11 @@ module MusicIR
       prev = nil
       self.each do |cur|
         if !prev.nil?
-          i = Music::Interval.calculate(prev.pitch, cur.pitch)
+          i = MusicIR::Interval.calculate(prev.pitch, cur.pitch)
           prev.analysis[:interval_after] = i
           cur.analysis[:interval_before] = i
 
-          di = Music::DistanceInterval.new(prev, cur)
+          di = MusicIR::DistanceInterval.new(prev, cur)
           prev.analysis[:distance_interval_after] = di
           cur.analysis[:distance_interval_before] = di
         end

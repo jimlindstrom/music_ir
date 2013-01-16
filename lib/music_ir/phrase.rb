@@ -97,7 +97,7 @@ module MusicIR
       indices = @start_idx..(@end_idx-1)
       puts "\t\tindices: #{indices.inspect}" if LOGGING
 
-      x = Math::RandomVariable.new(@note_queue.length)
+      x = Markov::RandomVariable.new(@note_queue.length)
       indices.zip(@note_queue[indices]).each do |y|
         x.add_possible_outcome(outcome=y[0], num_observations=1.0+((y[1].analysis[:distance_interval_after].distance || 0.0)*2))
       end

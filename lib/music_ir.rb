@@ -1,4 +1,4 @@
-require 'yaml'
+require 'markov'
 
 music_ir_files = ['beat.rb',
                   'beat_cross_similarity_matrix.rb',

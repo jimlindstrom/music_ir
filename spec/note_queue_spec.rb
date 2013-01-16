@@ -33,7 +33,7 @@ describe MusicIR::NoteQueue do
           @eq = @nq.to_event_queue
         end
         it "converts each note (not rest) into a note_on / note_off pair" do
-          @eq.map{ |x| x.message }.should == [MusicIR::Event::NOTE_ON, MusicIR::Event::NOTE_OFF]*3
+          @eq.map{ |x| x.message }.should == [MusicIR::MidiEvent::NOTE_ON, MusicIR::MidiEvent::NOTE_OFF]*3
         end
         it "gives each note_on/note_off the right pitch" do
           @eq.map{ |x| x.pitch }.should == [1,1, 2,2, 3,3]

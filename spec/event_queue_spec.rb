@@ -7,7 +7,7 @@ describe MusicIR::EventQueue do
   describe ".enqueue" do
     it "raises an error if the new element is not a MusicIR::Event" do
       @evq = MusicIR::EventQueue.new
-      expect { @evq.enqueue({:message=>[MusicIR::Event::NOTE_ON,40,100,0],:timestamp=>1000}) }.to raise_error(ArgumentError)
+      expect { @evq.enqueue({:message=>[MusicIR::MidiEvent::NOTE_ON,40,100,0],:timestamp=>1000}) }.to raise_error(ArgumentError)
     end
   end
    

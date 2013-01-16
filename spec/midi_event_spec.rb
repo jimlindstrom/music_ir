@@ -1,30 +1,30 @@
 require 'spec_helper'
 
-describe MusicIR::Event do
+describe MusicIR::MidiEvent do
      
   describe ".initialize" do
-    it "takes a message and a timestamp, and creates a new MusicIR::Event" do
-      @event = MusicIR::Event.new(message=MusicIR::Event::NOTE_ON, timestamp=123)
-      @event.should be_an_instance_of MusicIR::Event
+    it "takes a message and a timestamp, and creates a new MusicIR::MidiEvent" do
+      @event = MusicIR::MidiEvent.new(message=MusicIR::MidiEvent::NOTE_ON, timestamp=123)
+      @event.should be_an_instance_of MusicIR::MidiEvent
     end
     it "raises an error if the Midi event isn't valid" do
-      expect { @event = MusicIR::Event.new(message=-1, timestamp=0) }.to raise_error(ArgumentError)
+      expect { @event = MusicIR::MidiEvent.new(message=-1, timestamp=0) }.to raise_error(ArgumentError)
     end
     it "raises an error if the timestamp is negative" do
-      expect { @event = MusicIR::Event.new(message=MusicIR::Event::NOTE_ON, timestamp=-1) }.to raise_error(ArgumentError)
+      expect { @event = MusicIR::MidiEvent.new(message=MusicIR::MidiEvent::NOTE_ON, timestamp=-1) }.to raise_error(ArgumentError)
     end
   end
       
   describe ".message" do
     it "returns whatever you initialized it to" do
-      @event = MusicIR::Event.new(message=MusicIR::Event::NOTE_ON, timestamp=123)
-      @event.message.should == MusicIR::Event::NOTE_ON
+      @event = MusicIR::MidiEvent.new(message=MusicIR::MidiEvent::NOTE_ON, timestamp=123)
+      @event.message.should == MusicIR::MidiEvent::NOTE_ON
     end
   end
 
   describe ".timestamp" do
     it "returns whatever you initialized it to" do
-      @event = MusicIR::Event.new(message=MusicIR::Event::NOTE_ON, timestamp=123)
+      @event = MusicIR::MidiEvent.new(message=MusicIR::MidiEvent::NOTE_ON, timestamp=123)
       @event.timestamp.should == 123
     end
   end

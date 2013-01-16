@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-#require 'interactive_improvisor_lib'
-
 module MusicIR
 
   # Inter-onset interval (IOI) = the time delta between the start of two consecutive notes 

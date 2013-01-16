@@ -11,11 +11,11 @@ module CanDetectPhrases
 
   def detect_phrases
     return false if self.length < 2 # we need >= 2 per group, and at least one group
-    return false if self.map{|x| x.class}.include?(Music::Rest) # FIXME:For now, we can't deal with these.
+    return false if self.map{|x| x.class}.include?(MusicIR::Rest) # FIXME:For now, we can't deal with these.
 
     analyze!
     $phrase_similarity_cache = {} # reset the phase similarity queue (FIXME: not threadsafe or well architected)
-    @phrases = Music::PhraseList.initial(self)
+    @phrases = MusicIR::PhraseList.initial(self)
     attempts = MAX_ATTEMPTS.times.collect { new_phrase_detection_attempt }
 
     if $log
@@ -32,7 +32,7 @@ private
   MAX_ITERS   = 150
 
   def new_phrase_detection_attempt
-    best_phrases = Music::PhraseList.initial(self)
+    best_phrases = MusicIR::PhraseList.initial(self)
 
     retries = 0
     iter    = 0

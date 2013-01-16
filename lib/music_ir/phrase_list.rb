@@ -104,7 +104,7 @@ module MusicIR
       if self[phrase1_idx].length>1 and rand>0.5
 
         possible_num_notes = Array(1..self[phrase1_idx].length)
-        x = Math::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
+        x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
         possible_num_notes.each do |num_notes|
           x.add_possible_outcome(outcome=num_notes, num_observations=1.0/num_notes)
         end
@@ -117,7 +117,7 @@ module MusicIR
       elsif self[phrase2_idx].length>1
 
         possible_num_notes = Array(1..self[phrase2_idx].length)
-        x = Math::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
+        x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
         possible_num_notes.each do |num_notes|
           x.add_possible_outcome(outcome=num_notes, num_observations=1.0/num_notes)
         end
@@ -163,7 +163,7 @@ module MusicIR
       self.each { |phrase| phrase.phrase_similarity = [] }
 
       if self.length > 1
-        beat_arrays = self.collect { |phrase| Music::NoteQueue.new(phrase.notes).beat_array }
+        beat_arrays = self.collect { |phrase| MusicIR::NoteQueue.new(phrase.notes).beat_array }
 
         puts "\t\tbeat_similarity =" if do_logging
         padding = "x    " if do_logging
@@ -222,7 +222,7 @@ module MusicIR
       min_score = scores.min
       translated_scores = scores.map{ |s| s-min_score }
 
-      x = Math::RandomVariable.new(num_outcomes=self.length)
+      x = Markov::RandomVariable.new(num_outcomes=self.length)
       translated_scores.each_with_index do |score, idx|
         avoid_zero_observations = 0.01
         x.add_possible_outcome(outcome=idx, num_observations=avoid_zero_observations+score)
