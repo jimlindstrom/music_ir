@@ -1,0 +1,55 @@
+One option for making this not detect the phrases a meters is to (a) go left-to-
+right, looking for the first peak that is x% higher than its neighbors, and (b)
+take tempo into account & do a breadth-first search out from the expected meter
+of, say, 60 bpm.
+
+It might be cleaner to not represent Rests explicitly, but rather to let notes
+have an IOI (which would include the rest's duration) as well as a duration.
+
+A very different (and more cognitively plausible) approach would be to go left-
+to-right, building up a phrase structure as we go. This would have the advantage
+of weighting the initial material, which is almost always the most important
+phrase. It would avoid randomly walking into weird phrase-structure space and
+then trying to course-correct back to something sensible.
+
+What we're getting from the phrase detection isn't sufficient to do composition
+in the way I was expecting. It doesn't draw correspondences between phrases. If
+we were to track correspondences, we could use that to perform similar 
+operations on groups of phrases.  E.g., if two phrases are highly similar and 
+we're exploring tactics, we should perform the same tactic on both of them.
+
+It still surprises the hell out of of me that this isn't TRIVIAL. "My Bonnie 
+lies over the ocean" is practically verbatim AAAA BA'BA'.  Why isn't that a
+trivial win?
+
+It's remarkable to me that both meter detection and phrase detection are 
+relying heavily on BSMs, yet don't share information, and rely on totally 
+separate algorithms. They both depend on structure, and both seem likely to 
+benefit from a more sophisticated analysis of the BSM.
+	- what do squares mean?
+	- what do think vert/horiz stripes mean?
+
+Phrase List Scoring
+	- It could be helpful to run the listeners and incorporate surprise into
+	  DistInterval.
+	- Similarity is currently looked at on a note-by-note basis. But phrases
+	  exhibit patterns of similarity that are not evident in simple note-by-note
+	  comparisons.
+		- Instead of looking at overall phrase duration and penalizing the outliers,
+		  we could view duration as a property of phrase. It's not that we want to
+		  penalize outliers from the mean; it's more that we want to penalize 
+		  phrases which bear no similarity (including duration) to others.
+		- What kinds of properties do phrases have? Overall duration, overall 
+		  contour/shape, weighted pitch class set, duration set, 1st order markov
+		  stats, surprise
+	- Change the way similarity factors into scoring. Right now, the algorithm 
+	  is filtering low similarity scores and summing the remainder. That means 
+	  that a phrase candidate with mediocre similarity to every other phrase is
+	  treated just as high as a phrase with above-average similarity to exactly
+	  one other phrase.
+	- Don't let there be instances of phrase candidates A,B (consecutively) and
+	  then multiple other occurances of A,B (consecutively). These are probably
+	  a single phrase that's has two different endings. [this rule is too black-
+	  and-white, and would lump the entire Blues verse into a single phrase.]
+
+Refactor beat_position to just point to / contain a meter
