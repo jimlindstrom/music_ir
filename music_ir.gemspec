@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version       = MusicIR::VERSION
   gem.authors       = ["Jim Lindstrom"]
   gem.email         = ["jim.lindstrom@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{Detect phrases and meter. Model a corpus in terms markov chains for each dimension (pitch intervals, durations, pitch class intervals, etc).}
+  gem.summary       = %q{Music Information Retrieval package for ruby}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
