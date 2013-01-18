@@ -97,11 +97,11 @@ module MusicIR
       indices = @start_idx..(@end_idx-1)
       puts "\t\tindices: #{indices.inspect}" if LOGGING
 
-      x = Markov::RandomVariable.new(@note_queue.length)
+      x = Markov::RandomVariable.new(Markov::LiteralAlphabet.new((0..(@note_queue.length-1)).to_a))
       indices.zip(@note_queue[indices]).each do |y|
-        x.add_possible_outcome(outcome=y[0], num_observations=1.0+((y[1].analysis[:distance_interval_after].distance || 0.0)*2))
+        x.observe!(outcome=y[0], num_observations=1.0+((y[1].analysis[:distance_interval_after].distance || 0.0)*2))
       end
-      idx = x.choose_outcome
+      idx = x.sample
       puts "\t\tsplitting at: #{idx}" if LOGGING
 
       # generate the new phrase
