@@ -44,20 +44,20 @@ module MusicIR
       cache_key = self.hash_key + ";" + b.hash_key
       return $beat_similarity_cache[cache_key] if !$beat_similarity_cache[cache_key].nil?
 
-      if @cur_note.class == MusicIR::Rest and b.cur_note.class == MusicIR::Rest
+      if    (@cur_note.class == MusicIR::Rest) && (b.cur_note.class == MusicIR::Rest)
         pitch_similarity = 1.00
-      elsif @cur_note.class == MusicIR::Rest or b.cur_note.class == MusicIR::Rest
+      elsif (@cur_note.class == MusicIR::Rest) || (b.cur_note.class == MusicIR::Rest)
         pitch_similarity = 0.00
       elsif @cur_note.pitch.val == b.cur_note.pitch.val # this should really be moved to note.similarity_to
         # if exactly same pitches, give them a match of 1.00
         pitch_similarity = 1.00
-      elsif !self.interval.nil? and !b.interval.nil? and self.interval.val == b.interval.val
+      elsif (self.interval) && (b.interval) && (self.interval.val == b.interval.val)
         # if exactly same interals, give them a match of 0.90
         pitch_similarity = 0.90
       else
         # otherwise, give the best of the interval or abs. pitch similarity
         interval_similarity  = 0.0 
-        interval_similarity  = self.interval.similarity_to b.interval if !self.interval.nil?
+        interval_similarity  = self.interval.similarity_to b.interval if self.interval
 
         abs_pitch_similarity = @cur_note.pitch.similarity_to b.cur_note.pitch
         pitch_similarity = 0.9 * [ interval_similarity, abs_pitch_similarity ].max

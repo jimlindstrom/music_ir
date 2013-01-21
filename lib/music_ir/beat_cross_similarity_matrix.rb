@@ -7,11 +7,11 @@ module MusicIR
     attr_reader :val #2d array of [0..(width-1)][0..(1st index)]
 
     def initialize(beat_array1, beat_array2)
-      while beat_array1.length < beat_array2.length
-        beat_array1.push nil
+      if beat_array1.length < beat_array2.length
+        beat_array1 += [nil] * (beat_array2.length - beat_array1.length)
       end
-      while beat_array2.length < beat_array1.length
-        beat_array2.push nil
+      if beat_array2.length < beat_array1.length
+        beat_array2 += [nil] * (beat_array1.length - beat_array2.length)
       end
 
       @width = beat_array1.size
@@ -19,9 +19,9 @@ module MusicIR
       (0..(beat_array1.size-1)).each do |x|
         @val[x] = []
         (0..x).each do |y|
-          if beat_array1[x].nil? and beat_array2[y].nil? and (y>0) and (x>0)
+          if !beat_array1[x] && !beat_array2[y] && (y>0) && (x>0)
             @val[x][y] = 0.6*@val[x-1][y-1]
-          elsif beat_array1[x].nil? 
+          elsif !beat_array1[x]
             @val[x][y] = 0.0
           else
             @val[x][y] = beat_array1[x].similarity_to beat_array2[y] 
