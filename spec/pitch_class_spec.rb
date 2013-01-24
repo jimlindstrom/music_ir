@@ -45,4 +45,7 @@ describe MusicIR::PitchClass do
     end
   end
 
+  describe ".to_s" do
+    pending
+  end
 end

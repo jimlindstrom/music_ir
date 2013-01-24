@@ -13,6 +13,10 @@ module MusicIR
     def self.from_pitch(p)
       PitchClass.new((p.val + 3) % 12)
     end
+
+    def to_s
+      ["A","Bb","B","C","Db","D","Eb","E","F","Gb","G","Ab"][@val]
+    end
   end
 
 end
