@@ -14,8 +14,12 @@ module MusicIR
       PitchClass.new((p.val + 3) % 12)
     end
 
-    def to_s
-      ["A","Bb","B","C","Db","D","Eb","E","F","Gb","G","Ab"][@val]
+    def to_s(use_flats=true)
+      if use_flats
+        ["A","Bb","B","C","Db","D","Eb","E","F","Gb","G","Ab"][@val]
+      else
+        ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"][@val]
+      end
     end
   end
 
