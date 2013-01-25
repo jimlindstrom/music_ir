@@ -21,6 +21,12 @@ module MusicIR
         ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"][@val]
       end
     end
+
+    def self.from_s(str)
+      val   = ["A","Bb","B","C","Db","D","Eb","E","F","Gb","G","Ab"].index(str)
+      val ||= ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"].index(str) 
+      PitchClass.new(val)
+    end
   end
 
 end
