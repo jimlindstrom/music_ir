@@ -48,4 +48,10 @@ describe MusicIR::PitchClass do
   describe ".to_s" do
     pending
   end
+
+  describe "#num_values" do
+    subject { MusicIR::PitchClass.num_values }
+    it { should be_an_instance_of Fixnum }
+    it { should == 12 }
+  end
 end

@@ -27,6 +27,10 @@ module MusicIR
       val ||= ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"].index(str) 
       PitchClass.new(val)
     end
+
+    def self.num_values
+      12
+    end
   end
 
 end
