@@ -53,3 +53,19 @@ Here's an example of detecting the a phrase's meter:
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## More Details on Implementation
+
+### Beat Detection
+
+MusicIR does beat detection by calculating a song's Beat Similarity Matrix (see <http://scholar.google.com/scholar?q=beat+similarity+matrix>).
+BSMs are similar to autocorrelation.  Where autocorrelation works on a list of scalars, similarity matrices 
+work on a list of complex features (i.e. vectors).  First, you define a similarity function for each vector 
+element (pitch, duration, inteval, etc).  You can use this to define a function that compares the similarity 
+of any two beats.  Finally, using that function, you can generate a 2D matrix of the similarity of each beat 
+to every other beat.  The strength of a given periodicity at various beat period (2 beats, 3 beats, etc) can 
+be computed as the sum of the diagonal that many beats from the main diagnoal.
+
+In addition to being a fairly effective means of detecting a fragment's time signature, beat similarity
+matrices are interesting as visualizations of rhythmic structure in songs:
+<http://jimlindstrom.github.com/InteractiveMidiImproviser/>
