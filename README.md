@@ -56,6 +56,17 @@ Here's an example of detecting the a phrase's meter:
 
 ## More Details on Implementation
 
+### Key Estimation
+
+MusicIR can estimated both NoteQueue's key, and the chords implied by each note. To do this, it uses a hidden
+markov model (HMM). The observable outputs of the model are pitches. The hidden states of the model are the 
+pitches' underlying/implied chords (24 of them. 12 pitch classes. Major and minor versions of each). Given some
+statistics about the probability of a chord occurring in a given key, and about the probability of one chord
+transitioning to another (both these sets of stats come from: <http://research.microsoft.com/en-us/um/people/dan/chords/>),
+and given some stats about the probability of a melody note occurring in the context of a certain chord in a certain
+key (made up. but good enough.), the HMM picks the key and implied chords that maximize the likelihood of observing
+the given set of melody notes. The HMM implementation is: <https://github.com/dtkirsch/hmm>.
+
 ### Beat Detection
 
 MusicIR does beat detection by calculating a song's Beat Similarity Matrix (see <http://scholar.google.com/scholar?q=beat+similarity+matrix>).
