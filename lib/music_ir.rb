@@ -1,4 +1,6 @@
 require 'markov'
+require 'narray'
+require 'hmm'
 
 music_ir_files = ['beat.rb',
                   'beat_cross_similarity_matrix.rb',
@@ -15,14 +17,17 @@ music_ir_files = ['beat.rb',
                   'meter.rb',
                   'midi_event.rb',
                   'note.rb',
+                  'pitch.rb',
+                  'pitch_class.rb',
+                  'pitch_class_set.rb',
+                  'chord.rb',
+                  'key_estimator_chord_stats.rb',
+                  'note_queue_key_detection.rb',
                   'note_queue_meter_detection.rb',
                   'note_queue_phrase_detection.rb',
                   'note_queue.rb',
                   'phrase.rb',
                   'phrase_list.rb',
-                  'pitch.rb',
-                  'pitch_class.rb',
-                  'pitch_class_set.rb',
                   'rest.rb',
                   'version.rb',
                   'weighted_pitch_class_set.rb']

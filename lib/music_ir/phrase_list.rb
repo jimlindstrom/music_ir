@@ -106,9 +106,9 @@ module MusicIR
         possible_num_notes = Array(1..self[phrase1_idx].length)
         x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
         possible_num_notes.each do |num_notes|
-          x.add_possible_outcome(outcome=num_notes, num_observations=1.0/num_notes)
+          x.observe!(outcome=num_notes, num_observations=1.0/num_notes)
         end
-        num_notes = x.choose_outcome
+        num_notes = x.sample
 
         puts "\t\tgiving #{num_notes} note(s) from phrases #{phrase1_idx} to #{phrase2_idx}" if LOGGING
         self[phrase1_idx].end_idx -= num_notes
@@ -119,9 +119,9 @@ module MusicIR
         possible_num_notes = Array(1..self[phrase2_idx].length)
         x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
         possible_num_notes.each do |num_notes|
-          x.add_possible_outcome(outcome=num_notes, num_observations=1.0/num_notes)
+          x.observe!(outcome=num_notes, num_observations=1.0/num_notes)
         end
-        num_notes = x.choose_outcome
+        num_notes = x.sample
 
         puts "\t\tgiving #{num_notes} note(s) from phrases #{phrase2_idx} to #{phrase1_idx}" if LOGGING
         self[phrase1_idx].end_idx += num_notes
@@ -225,9 +225,9 @@ module MusicIR
       x = Markov::RandomVariable.new(num_outcomes=self.length)
       translated_scores.each_with_index do |score, idx|
         avoid_zero_observations = 0.01
-        x.add_possible_outcome(outcome=idx, num_observations=avoid_zero_observations+score)
+        x.observe!(outcome=idx, num_observations=avoid_zero_observations+score)
       end
-      idx = x.choose_outcome
+      idx = x.sample
 
       raise RuntimeError.new("idx must be not be nil. #{translated_scores.inspect}") if idx.nil?
       raise RuntimeError.new("idx #{idx} must be in [0, #{self.length-1}]") if idx<0 or idx>=self.length

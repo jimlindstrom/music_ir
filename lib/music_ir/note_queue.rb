@@ -7,6 +7,7 @@ module MusicIR
 
     include CanDetectMeter
     include CanDetectPhrases
+    include CanDetectKey
   
     def self.from_event_queue(evq)
       iois = evq.get_interonset_intervals + [ evq.get_last_duration ]
