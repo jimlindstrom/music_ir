@@ -14,6 +14,7 @@ module MusicIR
     end
 
     def add(pc)
+      raise ArgumentError.new("You can only add PitchClasses to PitchClassSet") if !pc.is_a?(MusicIR::PitchClass)
       @vals = (@vals + [pc.val]).sort.uniq
     end
 
