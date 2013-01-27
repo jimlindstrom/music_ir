@@ -5,8 +5,8 @@ module MusicIR
   class Note < Event
     attr_accessor :pitch
   
-    def initialize(pitch, duration)
-      super(duration)
+    def initialize(pitch, duration, analysis={})
+      super(duration, analysis)
       @pitch = pitch 
     end
   

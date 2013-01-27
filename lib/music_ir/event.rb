@@ -3,9 +3,9 @@ module MusicIR
   class Event
     attr_accessor :duration, :analysis
   
-    def initialize(duration)
+    def initialize(duration, analysis={})
       @duration = duration
-      @analysis = {}
+      @analysis = analysis
     end
   
   end
