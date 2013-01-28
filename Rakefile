@@ -18,8 +18,8 @@ end
 
 desc "Regenerate the parameters for the linear classifier for phrase boundary detection"
 task :regenerate_phrase_boundary_classifier do
-  sh "./tools/generate_phrase_boundary_classifier_matrix.rb > tools/phrases/classifier_matrix.txt"
-  sh "./tools/characterize_phrase_boundary_classifier.rb tools/phrases/classifier_matrix.txt"
+  sh "./tools/generate_phrase_boundary_classifier_matrix.rb > tools/phrases/boundary_classifier_matrix.txt"
+  sh "./tools/characterize_phrase_boundary_classifier.rb tools/phrases/boundary_classifier_matrix.txt"
 end
 
 task :default => :spec

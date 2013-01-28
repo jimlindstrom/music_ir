@@ -41,6 +41,14 @@ describe MusicIR::PhraseBoundaryClassifier do
     end
   end
 
+  describe ".end_of_phrase_boundary_strength" do
+    let(:note_idx) { 3 }
+    subject { pbc.end_of_phrase_boundary_strength(nq, note_idx) }
+    it { should be_a Float }
+    it { should be >= 0.0 }
+    it { should be <= 1.0 }
+  end
+
   describe ".end_of_phrase_indices" do
     subject { pbc.end_of_phrase_indices(nq) }
     it { should be_an Array }

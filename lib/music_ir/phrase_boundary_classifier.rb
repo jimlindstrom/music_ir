@@ -1,7 +1,7 @@
 module MusicIR
 
   class PhraseBoundaryClassifier
-    FILENAME = "tools/phrases/classifier_matrix.txt"
+    FILENAME = "tools/phrases/boundary_classifier_matrix.txt"
     def initialize
       rows=eval(File.read(FILENAME))
       
@@ -116,6 +116,18 @@ module MusicIR
         end
       end
       @model.predict(sample) == 1
+    end
+
+    def end_of_phrase_boundary_strength(note_queue, note_idx)
+      fs = factors(note_queue, note_idx)
+      sample = {}
+      fs.each_with_index do |x, idx|
+        if x
+          sample[idx] = x
+        end
+      end
+      winner, scores = @model.predict_values(sample)
+      return scores[1] || 0.0
     end
 
     def end_of_phrase_indices(note_queue)
