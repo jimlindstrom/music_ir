@@ -1,5 +1,14 @@
 #!/usr/bin/env ruby
 
+# FIXME: In section 4 of http://www.comp.nus.edu.sg/~mohan/papers/music_struct_det.pdf, the
+# authors point out that chords are likelier to change on beats vs. subbeats, and at half-notes
+# (if 4/4 time signature) than quarter notes, and at bar lines, vs non-bar-lines.  The chord
+# detection below could probably be enhanced by incorporating this knowledge. If beat position
+# of a note were known, different probabilities could be swapped in, accordingly. Refer to the
+# SELF_TRANSITION_PROB parameter in tools/create_hmm_matrices_for_key_estimation.rb. That is
+# the fudge factor I'm using to slow down the rate of chord change. It should be tweaked down
+# for beat zero, and tweaked up for subbeats.
+
 # assumes it is included in NoteQueue
 module CanDetectKey
   PITCH_CLASS_STRINGS = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]

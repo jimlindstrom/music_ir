@@ -1,3 +1,15 @@
+Ideas for improving phrase detection:
+1. http://www.mus.cam.ac.uk/~ic108/teaching/acoustics/MSL14/JusczykKrumhansl_PitchRhythmMusicInsfants_JEP1993.pdf
+	- The contour of pitches and the duration of notes exhibit obvious
+	  patterns at phrase boundaries (p629, figure 1).
+2. http://www.comp.nus.edu.sg/~mohan/papers/music_struct_det.pdf
+	- Incorporate information about the chord structure. Chord sequences 
+	  exhibit more regularity than melody pitches
+		- This would be a more radical change to the codebase. Right now
+		  meter, key, and phrasing are all agnostic of one another.
+
+################################################################################
+
 One option for making this not detect the phrases a meters is to (a) go left-to-
 right, looking for the first peak that is x% higher than its neighbors, and (b)
 take tempo into account & do a breadth-first search out from the expected meter
