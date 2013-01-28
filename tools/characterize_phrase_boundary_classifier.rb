@@ -2,7 +2,8 @@
 
 require 'ruby_linear'
 
-rows=eval(File.read("matrix.txt"))
+filename = ARGV[0]
+rows=eval(File.read(filename))
 
 labels  = rows.map{ |row| row[0]     }
 x       = rows.map{ |row| row[1..-1] }

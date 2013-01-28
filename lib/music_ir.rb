@@ -1,6 +1,7 @@
 require 'markov'
 require 'narray'
 require 'hmm'
+require 'ruby_linear'
 
 music_ir_files = ['beat.rb',
                   'beat_cross_similarity_matrix.rb',
@@ -24,6 +25,7 @@ music_ir_files = ['beat.rb',
                   'key_estimator_chord_stats.rb',
                   'note_queue_key_detection.rb',
                   'note_queue_meter_detection.rb',
+                  'phrase_boundary_classifier.rb',
                   'note_queue_phrase_detection.rb',
                   'note_queue.rb',
                   'phrase.rb',
