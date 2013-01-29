@@ -7,6 +7,8 @@ Ideas for improving phrase detection:
 	  exhibit more regularity than melody pitches
 		- This would be a more radical change to the codebase. Right now
 		  meter, key, and phrasing are all agnostic of one another.
+3. Consider moving to https://github.com/tomz/liblinear-ruby-swig. May
+   crash less than https://github.com/fcheung/rubylinear
 
 ################################################################################
 

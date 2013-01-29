@@ -60,17 +60,19 @@ def generate_matrix
         rows << row
       end
 
-      (2*vector[:phrase_boundaries].length).times do
+      (10*vector[:phrase_boundaries].length).times do
         start_idx = (0..(nq.length-1)).to_a.sample
         end_idx = (start_idx..(nq.length-1)).to_a.sample
 
-        row = []
-        row << 0 # not a real phrase
-  
-        $scoring_lambdas.each do |x|
-          row << factor_score = x[:lambda].call(nq, start_idx, end_idx)
+        if !vector[:phrase_boundaries].include?({:start_idx=>start_idx, :end_idx=>end_idx})
+          row = []
+          row << 0 # not a real phrase
+    
+          $scoring_lambdas.each do |x|
+            row << factor_score = x[:lambda].call(nq, start_idx, end_idx)
+          end
+          rows << row
         end
-        rows << row
       end
     end
   end

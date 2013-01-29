@@ -127,7 +127,7 @@ module MusicIR
         end
       end
       winner, scores = @model.predict_values(sample)
-      return scores[1] || 0.0
+      return scores[1]-scores[0]
     end
 
     def end_of_phrase_indices(note_queue)

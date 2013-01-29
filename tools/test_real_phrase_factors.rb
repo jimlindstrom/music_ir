@@ -56,10 +56,12 @@ def mean_abs_t_score_for_factor(factor_lambda)
         boundary_scores << factor_score = factor_lambda.call(nq, phrase[:start_idx], phrase[:end_idx])
       end
 
-      (2*vector[:phrase_boundaries].length).times do
+      (10*vector[:phrase_boundaries].length).times do
         start_idx = (0..(nq.length-1)).to_a.sample
         end_idx = (start_idx..(nq.length-1)).to_a.sample
-        nonboundary_scores << factor_score = factor_lambda.call(nq, start_idx, end_idx)
+        if !vector[:phrase_boundaries].include?({:start_idx=>start_idx, :end_idx=>end_idx})
+          nonboundary_scores << factor_score = factor_lambda.call(nq, start_idx, end_idx)
+        end
       end
 
       boundary_scores    = boundary_scores.select{    |x| x } # ignore nils
