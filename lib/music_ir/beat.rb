@@ -5,19 +5,9 @@ module MusicIR
   $beat_similarity_cache = { }
   
   class Beat
-    attr_accessor :prev_note, :cur_note
+    attr_accessor :prev_note, :cur_note # FIXME: why are these accessible?
   
-    def interval # this should really be using the interval that's on note.analysis
-      return @interval if !@interval.nil?
-  
-      if !@prev_note.nil? and !@cur_note.nil? and @prev_note.class==MusicIR::Note and @cur_note.class==MusicIR::Note
-        #FIXME: calculate the interval since the LAST note, even if the prev note was a rest
-        @interval = Interval.calculate(@prev_note.pitch, @cur_note.pitch)
-      end
-      return @interval
-    end
-
-    def hash_key
+    def hash_key # FIXME: why isn't this private?
       key = ""
 
       if @prev_note.nil?
@@ -44,28 +34,10 @@ module MusicIR
       cache_key = self.hash_key + ";" + b.hash_key
       return $beat_similarity_cache[cache_key] if !$beat_similarity_cache[cache_key].nil?
 
-      if    (@cur_note.class == MusicIR::Rest) && (b.cur_note.class == MusicIR::Rest)
-        pitch_similarity = 1.00
-      elsif (@cur_note.class == MusicIR::Rest) || (b.cur_note.class == MusicIR::Rest)
-        pitch_similarity = 0.00
-      elsif @cur_note.pitch.val == b.cur_note.pitch.val # this should really be moved to note.similarity_to
-        # if exactly same pitches, give them a match of 1.00
-        pitch_similarity = 1.00
-      elsif (self.interval) && (b.interval) && (self.interval.val == b.interval.val)
-        # if exactly same interals, give them a match of 0.90
-        pitch_similarity = 0.90
-      else
-        # otherwise, give the best of the interval or abs. pitch similarity
-        interval_similarity  = 0.0 
-        interval_similarity  = self.interval.similarity_to b.interval if self.interval
+      # get similarity
+      beat_similarity = @cur_note.similarity_to b.cur_note
 
-        abs_pitch_similarity = @cur_note.pitch.similarity_to b.cur_note.pitch
-        pitch_similarity = 0.9 * [ interval_similarity, abs_pitch_similarity ].max
-      end
-
-      duration_similarity = @cur_note.duration.similarity_to b.cur_note.duration
-
-      beat_similarity = 0.6*pitch_similarity + 0.4*duration_similarity
+      # store it to the cache
       $beat_similarity_cache[cache_key] = beat_similarity
       return beat_similarity
     end
