@@ -104,7 +104,8 @@ module MusicIR
       if self[phrase1_idx].length>1 and rand>0.5
 
         possible_num_notes = Array(1..self[phrase1_idx].length)
-        x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
+        #x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
+        x = Markov::RandomVariable.new(Markov::LiteralAlphabet.new((0..(possible_num_notes.length+2-1)).to_a))
         possible_num_notes.each do |num_notes|
           x.observe!(outcome=num_notes, num_observations=1.0/num_notes)
         end
@@ -117,7 +118,8 @@ module MusicIR
       elsif self[phrase2_idx].length>1
 
         possible_num_notes = Array(1..self[phrase2_idx].length)
-        x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
+        #x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
+        x = Markov::RandomVariable.new(Markov::LiteralAlphabet.new((0..(possible_num_notes.length+2-1)).to_a))
         possible_num_notes.each do |num_notes|
           x.observe!(outcome=num_notes, num_observations=1.0/num_notes)
         end
@@ -222,7 +224,8 @@ module MusicIR
       min_score = scores.min
       translated_scores = scores.map{ |s| s-min_score }
 
-      x = Markov::RandomVariable.new(num_outcomes=self.length)
+      #x = Markov::RandomVariable.new(num_outcomes=self.length)
+      x = Markov::RandomVariable.new(Markov::LiteralAlphabet.new((0..(self.length-1)).to_a))
       translated_scores.each_with_index do |score, idx|
         avoid_zero_observations = 0.01
         x.observe!(outcome=idx, num_observations=avoid_zero_observations+score)
