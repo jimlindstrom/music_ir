@@ -60,13 +60,17 @@ describe MusicIR::Phrase do
   end
 
   describe ".score" do
-    context "after running .analyze!" do
-      before { nq.analyze! }
-  
-      let(:idx1) { 2 }
-      let(:idx2) { 8 }
-      let(:p) { MusicIR::Phrase.new(nq, @idx1=2, @idx2=8) }
-      subject { p.score }
+    context "given an analyzed notequeue" do
+      before { nq.analyze! } # FIXME: and ... analyze_meter, and analyze_harmony?
+   
+      let(:phrase_list) { MusicIR::PhraseList.new(nq) }
+
+      before do
+        phrase_list << MusicIR::Phrase.new(nq, 0, 2)
+        phrase_list << MusicIR::Phrase.new(nq, 2, nq.length-1)
+      end
+
+      subject { phrase_list.first.score(phrase_list) }
 
       it { should be_a Float }
     end

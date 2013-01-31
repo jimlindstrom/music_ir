@@ -28,8 +28,8 @@ module CanDetectPhrases
 
 private
 
-  MAX_RETRIES =  35
-  MAX_ITERS   = 150
+  MAX_RETRIES = 35
+  MAX_ITERS   = 50
 
   def new_phrase_detection_attempt
     best_phrases = MusicIR::PhraseList.initial(self)

@@ -1,9 +1,5 @@
-#!/usr/bin/env ruby
-
 module MusicIR
-
   class PhraseList < Array
-    LOGGING = false # true
 
     def initialize(note_queue)
       @note_queue = note_queue
@@ -24,24 +20,11 @@ module MusicIR
     end
 
     def score
-      return @score if !@score.nil?
-
-      puts "\tscoring phrases:" if LOGGING
-      calculate_phrase_duration_penalty(do_logging=LOGGING)
-      calculate_phrase_similarity(do_logging=LOGGING)
-
-      scores = self.collect { |phrase| phrase.score(do_logging=LOGGING) }
-      @score = scores.inject(0.0) { |x,s| x + s }
-      puts "\t\toverall score:                     " +
-           "                                       " +
-           "                                       " + 
-           "   #{sprintf("% 6.1f", @score)}" if LOGGING
-
-      return @score
+      @score ||= self.map{ |phrase| phrase.score(self) }.inject(:+)
     end
 
     def to_s
-      self.collect{|p| "#{p.start_idx}-#{p.end_idx}" }.join(", ")
+      self.map{ |p| "#{p.start_idx}-#{p.end_idx}" }.join(", ")
     end
 
     # UNTESTED
@@ -83,55 +66,46 @@ module MusicIR
     def merge_two_phrases
       @score = nil # if we had scored this phrase list it's now invalidated
 
-      puts "\tmerge_two_phrases" if LOGGING
       return if self.length < 2
 
       phrase1_idx, phrase2_idx = choose_two_phrases_weighted_by_score
 
-      puts "\t\tmerging phrases #{phrase1_idx} and #{phrase2_idx}" if LOGGING
-      self[phrase1_idx].end_idx = self[phrase2_idx].end_idx
+      self[phrase1_idx] = Phrase.new(@note_queue, self[phrase1_idx].start_idx, self[phrase2_idx].end_idx)
       self.delete_at(phrase2_idx)
     end
 
     def shift_boundary_between_two_phrases
       @score = nil # if we had scored this phrase list it's now invalidated
 
-      puts "\tshift_boundary_between_two_phrases" if LOGGING
       return if self.length < 2
 
       phrase1_idx, phrase2_idx = choose_two_phrases_weighted_by_score
 
       if self[phrase1_idx].length>1 and rand>0.5
 
-        possible_num_notes = Array(1..self[phrase1_idx].length)
-        #x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
-        x = Markov::RandomVariable.new(Markov::LiteralAlphabet.new((0..(possible_num_notes.length+2-1)).to_a))
+        possible_num_notes = Array(1..(self[phrase1_idx].length-1))
+        x = Markov::RandomVariable.new(Markov::LiteralAlphabet.new(possible_num_notes))
         possible_num_notes.each do |num_notes|
           x.observe!(outcome=num_notes, num_observations=1.0/num_notes)
         end
         num_notes = x.sample
 
-        puts "\t\tgiving #{num_notes} note(s) from phrases #{phrase1_idx} to #{phrase2_idx}" if LOGGING
-        self[phrase1_idx].end_idx -= num_notes
-        self[phrase2_idx].start_idx -= num_notes
+        self[phrase1_idx] = Phrase.new(@note_queue, self[phrase1_idx].start_idx,             self[phrase1_idx].end_idx - num_notes)
+        self[phrase2_idx] = Phrase.new(@note_queue, self[phrase2_idx].start_idx - num_notes, self[phrase2_idx].end_idx            )
 
       elsif self[phrase2_idx].length>1
 
-        possible_num_notes = Array(1..self[phrase2_idx].length)
-        #x = Markov::RandomVariable.new(num_outcomes=possible_num_notes.length+2)
-        x = Markov::RandomVariable.new(Markov::LiteralAlphabet.new((0..(possible_num_notes.length+2-1)).to_a))
+        possible_num_notes = Array(1..(self[phrase2_idx].length-1))
+        x = Markov::RandomVariable.new(Markov::LiteralAlphabet.new(possible_num_notes))
         possible_num_notes.each do |num_notes|
           x.observe!(outcome=num_notes, num_observations=1.0/num_notes)
         end
         num_notes = x.sample
 
-        puts "\t\tgiving #{num_notes} note(s) from phrases #{phrase2_idx} to #{phrase1_idx}" if LOGGING
-        self[phrase1_idx].end_idx += num_notes
-        self[phrase2_idx].start_idx += num_notes
+        self[phrase1_idx] = Phrase.new(@note_queue, self[phrase1_idx].start_idx,             self[phrase1_idx].end_idx + num_notes)
+        self[phrase2_idx] = Phrase.new(@note_queue, self[phrase2_idx].start_idx + num_notes, self[phrase2_idx].end_idx            )
       end
     end
-
-  private
 
     def median_phrase_duration
       phrase_durations = self.collect{ |p| p.duration }.sort
@@ -144,54 +118,38 @@ module MusicIR
       return median_duration
     end
 
-    def calculate_phrase_duration_penalty(do_logging=false)
-      self.each { |phrase| phrase.duration_deviance = 0.0 }
-
+    def phrase_duration_penalty_for(phrase)
       if self.length > 1
         median_duration = median_phrase_duration
-        puts "\t\tmedian_duration = #{median_duration}" if do_logging
 
-        self.each do |phrase| 
-          if phrase.duration > median_duration
-            phrase.duration_deviance = ((phrase.duration - median_duration) / median_duration.to_f)**1.5
-          else
-            phrase.duration_deviance = ((median_duration - phrase.duration) / phrase.duration.to_f)**1.5
-          end
+        if phrase.duration > median_duration
+          duration_deviance = ((phrase.duration - median_duration) / median_duration.to_f)**1.5
+        else
+          duration_deviance = ((median_duration - phrase.duration) / phrase.duration.to_f)**1.5
         end
+      else
+        duration_deviance = 0.0
       end
+
+      duration_deviance
     end
 
-    def calculate_phrase_similarity(do_logging=false)
-      self.each { |phrase| phrase.phrase_similarity = [] }
+    def phrase_cross_similarities(phrase)
+      phrase_similarities = []
 
       if self.length > 1
-        beat_arrays = self.collect { |phrase| MusicIR::NoteQueue.new(phrase.notes).beat_array }
-
-        puts "\t\tbeat_similarity =" if do_logging
-        padding = "x    " if do_logging
-        (0..(self.length-2)).each do |x|
-          similarities = [] if do_logging
-          cache_subkey = "#{self[x].start_idx},#{self[x].end_idx};"
-
-          ((x+1)..(self.length-1)).each do |y|
-            cache_key = cache_subkey + "#{self[y].start_idx},#{self[y].end_idx}"
-            s = if !$phrase_similarity_cache[cache_key].nil?
-              $phrase_similarity_cache[cache_key]
-            else
-              matrix = BeatCrossSimilarityMatrix.new(beat_arrays[x], beat_arrays[y])
-              $phrase_similarity_cache[cache_key] = matrix.max_arithmetic_mean_of_diag(penalize_for_overhang=true)
-            end
-
-            similarities.push s if do_logging
-            self[x].phrase_similarity.push s
-            self[y].phrase_similarity.push s
-          end
-
-          puts "\t\t\t" + padding + similarities.map{ |x| sprintf("%0.2f", x) }.join(" ") if do_logging
-          padding = "     " + padding if do_logging
+        phrase_beats = MusicIR::NoteQueue.new(phrase.notes).beat_array
+        (self-[phrase]).each do |other_phrase|
+          other_phrase_beats = MusicIR::NoteQueue.new(other_phrase.notes).beat_array
+          matrix = BeatCrossSimilarityMatrix.new(phrase_beats, other_phrase_beats)
+          phrase_similarities <<  matrix.max_arithmetic_mean_of_diag(penalize_for_overhang=true)
         end
       end
+
+      phrase_similarities
     end
+
+  private
 
     def choose_two_phrases_weighted_by_score
       phrase1_idx = choose_phrase_idx_weighted_by_score
@@ -206,25 +164,21 @@ module MusicIR
     end
 
     def choose_phrase_idx_weighted_by_duration_deviance
-      choose_phrase_idx_weighted_by_lambda(lambda{|phrase| phrase.duration_deviance})
+      choose_phrase_idx_weighted_by_lambda(lambda{|phrase| phrase_duration_penalty_for(phrase)})
     end
 
     def choose_phrase_idx_weighted_by_score
-      choose_phrase_idx_weighted_by_lambda(lambda{|phrase| -phrase.score})
+      choose_phrase_idx_weighted_by_lambda(lambda{|phrase| -phrase.score(self)})
     end
 
     def choose_phrase_idx_weighted_by_lambda(l)
       raise RuntimeError.new("can't choose phrase index for empty phrase list") if self.length==0
       return 0 if self.length==1
 
-      calculate_phrase_similarity
-      calculate_phrase_duration_penalty
-
-      scores = self.collect{ |phrase| l.call(phrase) }
+      scores = self.map{ |phrase| l.call(phrase) }
       min_score = scores.min
       translated_scores = scores.map{ |s| s-min_score }
 
-      #x = Markov::RandomVariable.new(num_outcomes=self.length)
       x = Markov::RandomVariable.new(Markov::LiteralAlphabet.new((0..(self.length-1)).to_a))
       translated_scores.each_with_index do |score, idx|
         avoid_zero_observations = 0.01
