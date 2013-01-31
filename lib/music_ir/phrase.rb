@@ -1,7 +1,4 @@
-#!/usr/bin/env ruby
-
 module MusicIR
-
   class Phrase
     attr_reader :start_idx, :end_idx
 
@@ -25,7 +22,7 @@ module MusicIR
     end
 
     def duration
-      notes.inject(0.0) { |x, note| x + note.duration.val }
+      notes.map{ |note| note.duration.val }.inject(:+)
     end
 
     DIST_WEIGHT = 3.0      # increasing this favors phrases that contain low-distance intervals
@@ -35,11 +32,10 @@ module MusicIR
     DUR_DEV_WEIGHT = 250.0 # increases this favors phrases that are closer to the mean duration
 
     def score(phrase_list)
-      raise RuntimeError.new("last note is nil. nq.length=#{@note_queue.length}. start_idx=#{@start_idx}. end_idx=#{@end_idx}") if !notes.last
       total  = duration_penalty
       total -= DIST_WEIGHT*total_distance
       total += similarity_to_other_phrases(phrase_list)
-      total -= DUR_DEV_WEIGHT*duration_deviance(phrase_list)
+      total -= DUR_DEV_WEIGHT*phrase_list.phrase_duration_penalty_for(self)
 
       return total
     end
@@ -60,11 +56,7 @@ module MusicIR
       return new_phrase
     end
 
-    private
-
-    def duration_deviance(phrase_list)
-      phrase_list.phrase_duration_penalty_for(self)
-    end
+  private
 
     def duration_penalty # penalizes really short or long phrases
       penalty = case 

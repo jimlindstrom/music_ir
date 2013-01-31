@@ -101,6 +101,90 @@ module MusicIR
       create_intervals
     end
 
+    def ratio_of_cur_and_prev_duration(note_idx)
+      if (note_idx-1) >= 0
+        return self[note_idx+0].duration.val.to_f / self[note_idx-1].duration.val
+      else
+        return nil # undefined
+      end
+    end
+
+    def ratio_of_cur_and_next_duration(note_idx)
+      if (note_idx+1) < self.length
+        return self[note_idx+0].duration.val.to_f / self[note_idx+1].duration.val
+      else
+        return nil # undefined
+      end
+    end
+
+    def is_end_of_measure?(note_idx)
+      if self[note_idx].analysis[:beat_position] && ((note_idx+1) < self.length)
+        cur_note_meas  = self[note_idx+0].analysis[:beat_position].measure
+        next_note_meas = self[note_idx+1].analysis[:beat_position].measure
+        return (next_note_meas > cur_note_meas) ? 1 : 0
+      else
+        return nil # undefined
+      end
+    end
+
+    def is_subbeat_0?(note_idx)
+      if self[note_idx].analysis[:beat_position]
+        return (self[note_idx].analysis[:beat_position].subbeat == 0) ? 1 : 0
+      else
+        return nil # undefined
+      end
+    end
+
+    def is_different_from_next_chord?(note_idx)
+      if ((note_idx-1) >= 0) && self[note_idx-1].analysis[:chord] && self[note_idx].analysis[:chord]
+        return (self[note_idx-1].analysis[:chord].to_s == self[note_idx].analysis[:chord].to_s) ? 1 : 0
+      else
+        return nil # undefined
+      end
+    end
+
+    def interval_after(note_idx)
+      if (note_idx+1) < self.length
+        return (self[note_idx+1].pitch.val - self[note_idx+0].pitch.val).abs
+      else
+        return nil # undefined
+      end
+    end
+
+    def is_repeated_pitch?(note_idx)
+      if (note_idx-1) >= 0
+        return (self[note_idx-1].pitch.val == self[note_idx+0].pitch.val) ? 1 : 0
+      else
+        return nil # undefined
+      end
+    end
+
+    def is_next_chord_tonic?(note_idx)
+      if ((note_idx+1) < self.length) && self[note_idx+1].analysis[:key] && self[note_idx+1].analysis[:chord]
+        return (self[note_idx+1].analysis[:key].to_s == self[note_idx+1].analysis[:chord].to_s) ? 1 : 0
+      else
+        return nil # undefined
+      end
+    end
+
+    def ratio_of_abs_interval_before_vs_after(note_idx)
+      if ((note_idx-1) >= 0) && ((note_idx+1) < self.length)
+        interval_before = (self[note_idx+0].pitch.val - self[note_idx-1].pitch.val).abs
+        interval_after  = (self[note_idx+1].pitch.val - self[note_idx+0].pitch.val).abs
+        return (interval_before+1.0) / (interval_after+1.0)
+      else
+        return nil # undefined
+      end
+    end
+
+    def is_same_as_next_pitch?(note_idx)
+      if (note_idx+1) < self.length
+        return (self[note_idx+1].pitch.val == self[note_idx+0].pitch.val) ? 1 : 0
+      else
+        return nil # undefined
+      end
+    end
+
   private
   
     def tag_with_notes_left

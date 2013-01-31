@@ -124,4 +124,44 @@ describe MusicIR::NoteQueue do
     end
   end
 
+  describe ".ratio_of_cur_and_prev_duration" do
+    pending
+  end
+
+  describe ".ratio_of_cur_and_next_duration" do
+    pending
+  end
+
+  describe ".is_end_of_measure?" do
+    pending
+  end
+
+  describe ".is_subbeat_0?" do
+    pending
+  end
+
+  describe ".is_different_from_next_chord?" do
+    pending
+  end
+
+  describe ".interval_after" do
+    pending
+  end
+
+  describe ".is_repeated_pitch?" do
+    pending
+  end
+
+  describe ".is_next_chord_tonic?" do
+    pending
+  end
+
+  describe ".ratio_of_abs_interval_before_vs_after" do
+    pending
+  end
+
+  describe ".is_same_as_next_pitch?" do
+    pending
+  end
+
 end
