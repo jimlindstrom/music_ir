@@ -5,9 +5,6 @@ require 'music_ir'
 $LOAD_PATH << 'spec/vectors'
 require 'meter_vectors'
 
-$LOAD_PATH << 'tools'
-require 'real_phrase_factors'
-
 class Array
   def mean
     self.inject(:+).to_f / self.length
@@ -50,27 +47,37 @@ def generate_matrix
     nq = vector[:note_queue]
     if nq.none?{ |note| note.is_a? MusicIR::Rest }
 
+      # correct examples
+      correct_phrases = MusicIR::PhraseList.new(nq)
       vector[:phrase_boundaries].each do |phrase|
+        correct_phrases.push MusicIR::Phrase.new(nq, phrase[:start_idx], phrase[:end_idx])
+      end
+      correct_phrases.each do |phrase|
         row = []
         row << 1 # is a real phrase
- 
-        $scoring_lambdas.each do |x|
-          row << factor_score = x[:lambda].call(nq, phrase[:start_idx], phrase[:end_idx])
-        end
+        row += phrase.classifier_factors(correct_phrases)
         rows << row
       end
 
-      (10*vector[:phrase_boundaries].length).times do
-        start_idx = (0..(nq.length-1)).to_a.sample
-        end_idx = (start_idx..(nq.length-1)).to_a.sample
+      # incorrect examples
+      10.times do
+        incorrect_phrases = MusicIR::PhraseList.new(nq)
+        ends_of_phrase = []
+        possible_ends_of_phrase = (1..(nq.length-2)).to_a
+        (correct_phrases.length-1).times do
+          x = possible_ends_of_phrase.sample
+          possible_ends_of_phrase -= [x]
+          ends_of_phrase << x
+        end
+        ends_of_phrase.sort!{ |x,y| x <=> y }
+        ([-1] + ends_of_phrase + [nq.length-1]).each_cons(2) do |pair|
+          incorrect_phrases.push MusicIR::Phrase.new(nq, pair[0]+1, pair[1])
+        end
 
-        if !vector[:phrase_boundaries].include?({:start_idx=>start_idx, :end_idx=>end_idx})
+        incorrect_phrases.each do |phrase|
           row = []
-          row << 0 # not a real phrase
-    
-          $scoring_lambdas.each do |x|
-            row << factor_score = x[:lambda].call(nq, start_idx, end_idx)
-          end
+          row << 0 # isn't a real phrase
+          row += phrase.classifier_factors(correct_phrases)
           rows << row
         end
       end

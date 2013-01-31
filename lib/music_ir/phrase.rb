@@ -113,6 +113,58 @@ module MusicIR
       return 0.0
     end
 
+    def boundary_strength_of_end
+      pbc = MusicIR::PhraseBoundaryClassifier.instance
+      pbc.end_of_phrase_boundary_strength(@note_queue, @end_idx)
+    end
+
+    def ratio_of_boundary_strength_of_end_vs_max
+      return nil if @start_idx==@end_idx
+      pbc =  MusicIR::PhraseBoundaryClassifier.instance
+      boundary_strengths = (@start_idx..@end_idx).map{ |note_idx| pbc.end_of_phrase_boundary_strength(@note_queue, note_idx) }
+      boundary_strengths[-1] / (boundary_strengths[0..-2].max + 1.0)
+    end
+
+    def ratio_of_boundary_strength_of_max_vs_min
+      return nil if @start_idx==@end_idx
+      pbc =  MusicIR::PhraseBoundaryClassifier.instance
+      boundary_strengths = (@start_idx..@end_idx).map{ |note_idx| pbc.end_of_phrase_boundary_strength(@note_queue, note_idx) }
+      boundary_strengths.max / (boundary_strengths.min + 1.0)
+    end
+
+    def ratio_of_last_two_durations
+      return nil if ((@end_idx-@start_idx)<1)
+      last_duration = @note_queue[@end_idx-0].duration.val
+      prev_duration = @note_queue[@end_idx-1].duration.val
+      (1.0 + prev_duration) / (1.0 + last_duration)
+    end
+
+    def ratio_of_last_two_intervals
+      return nil if ((@end_idx-@start_idx)<2)
+      last_interval = (@note_queue[@end_idx-0].pitch.val - @note_queue[@end_idx-1].pitch.val).abs
+      prev_interval = (@note_queue[@end_idx-1].pitch.val - @note_queue[@end_idx-2].pitch.val).abs
+      if last_interval==0
+        return (prev_interval>0) ? 100 : -100
+      end
+      prev_interval.to_f / last_interval
+    end
+
+    def classifier_factors(phrase_list)
+      [ self.duration_penalty,
+        self.length_penalty,
+        self.mean_similarity_to_other_phrases(phrase_list),
+        self.num_similar_phrases(phrase_list),
+        self.length_times_num_similar_phrases(phrase_list),
+        self.length_times_mean_similarity_to_other_phrases(phrase_list),
+        self.sum_of_interior_distances,
+        self.distance_after,
+        self.boundary_strength_of_end,
+        self.ratio_of_boundary_strength_of_end_vs_max,
+        self.ratio_of_boundary_strength_of_max_vs_min,
+        self.ratio_of_last_two_durations,
+        self.ratio_of_last_two_intervals ]
+    end
+
   end
  
 end
