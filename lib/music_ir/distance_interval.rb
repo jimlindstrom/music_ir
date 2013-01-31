@@ -2,7 +2,7 @@
 
 module MusicIR
 
-  class DistanceInterval
+  class DistanceInterval # FIXME: This seems like nonsense. Try getting rid of it.
     MAX_PITCH_DELTA    =  6
     MAX_DURATION_DELTA =  8
 

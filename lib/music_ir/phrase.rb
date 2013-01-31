@@ -22,20 +22,22 @@ module MusicIR
     end
 
     def duration
-      notes.map{ |note| note.duration.val }.inject(:+)
+      notes.map{ |note| note.duration.val }.inject(:+).to_f
     end
 
-    DIST_WEIGHT = 3.0      # increasing this favors phrases that contain low-distance intervals
-    SIM_A = 1.0            # increasing this favors phrases that are longer
-    SIM_B = 2.0            # increasing this favors phrases that are similar to a high number of phrases
-    SIM_C = 3.0            # ?
-    DUR_DEV_WEIGHT = 250.0 # increases this favors phrases that are closer to the mean duration
+    DIST_WEIGHT    =    3.0 # increasing this favors phrases that contain low-distance intervals
+    DUR_DEV_WEIGHT = -250.0 # decreasing this favors phrases that are closer to the mean duration
 
     def score(phrase_list)
       total  = duration_penalty
-      total -= DIST_WEIGHT*total_distance
-      total += similarity_to_other_phrases(phrase_list)
-      total -= DUR_DEV_WEIGHT*phrase_list.phrase_duration_penalty_for(self)
+      total += length_penalty
+      total -= DIST_WEIGHT*sum_of_interior_distances
+      total += DIST_WEIGHT*distance_after
+      total += DUR_DEV_WEIGHT*phrase_list.phrase_duration_penalty_for(self)
+      total += mean_similarity_to_other_phrases(phrase_list)
+      total += num_similar_phrases(phrase_list)
+      total += length_times_num_similar_phrases(phrase_list)
+      total += length_times_mean_similarity_to_other_phrases(phrase_list)
 
       return total
     end
@@ -56,51 +58,59 @@ module MusicIR
       return new_phrase
     end
 
-  private
-
     def duration_penalty # penalizes really short or long phrases
-      penalty = case 
+      case 
         when duration >= 4 then    0
         when duration == 3 then -100
         when duration == 2 then -400
         when duration <= 1 then -800
       end
-      penalty += case 
+    end
+
+    def length_penalty # penalizes really short or long phrases
+      case 
         when  length >= 12                  then   -1*((length*4)**1.25)
         when (length >=  3 and length < 12) then    0
         when  length ==  2                  then -150
         when  length <=  1                  then -400
       end
-      penalty
     end
 
-    def similarity_to_other_phrases(phrase_list)
-      phrase_similarities = phrase_list.phrase_cross_similarities(self)
-      filtered_similarities = phrase_similarities.select{ |x| x > 0.3 }
-      if filtered_similarities.empty?
-        similarity = 0.0
-        mean_similarity = 0.0
-        similarity_weight = 0
-      else
-        mean_similarity = filtered_similarities.inject(:+) / filtered_similarities.length.to_f
-        similarity = (self.length**SIM_A) * (filtered_similarities.length**SIM_B) / (10.0**(SIM_C*mean_similarity)) 
-        similarity_weight = 2
-      end
-      similarity_weight*similarity
+    def similarities_to_other_phrases(phrase_list)
+      phrase_list.phrase_cross_similarities(self)
+                 .select{ |x| x > 0.3 }
     end
 
-    def total_distance
-      within_dist = 0.0
+    def mean_similarity_to_other_phrases(phrase_list)
+      similarities = similarities_to_other_phrases(phrase_list)
+      return 0.0 if similarities.empty?
+      return similarities.inject(:+) / similarities.length.to_f
+    end
+
+    def num_similar_phrases(phrase_list)
+      similarities_to_other_phrases(phrase_list).length
+    end
+
+    def length_times_num_similar_phrases(phrase_list)
+      self.length * similarities_to_other_phrases(phrase_list).length
+    end
+
+    def length_times_mean_similarity_to_other_phrases(phrase_list)
+      self.length * similarities_to_other_phrases(phrase_list).length
+    end
+
+    def sum_of_interior_distances
       if length > 1
-        within_dist += notes[0..-2].map{ |note| note.analysis[:distance_interval_after].distance }.inject(:+)
+        return notes[0..-2].map{ |note| note.analysis[:distance_interval_after].distance }.inject(:+)
       end
+      return 0.0
+    end
 
-      border_dist = 0.0
-      if !notes.last.analysis[:distance_interval_after].nil?
-        border_dist = notes.last.analysis[:distance_interval_after].distance
+    def distance_after
+      if notes.last.analysis[:distance_interval_after]
+        return notes.last.analysis[:distance_interval_after].distance
       end
-
-      return within_dist - border_dist
+      return 0.0
     end
 
   end
