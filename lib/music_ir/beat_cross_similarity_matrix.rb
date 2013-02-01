@@ -56,7 +56,7 @@ module MusicIR
         x += 1
         y += 1
       end
-      return prod / 1.2**(@width-i)
+      return prod / 1.0**(@width-i)
     end
 
     def max_arithmetic_mean_of_diag(penalize_overhanging_notes=true)

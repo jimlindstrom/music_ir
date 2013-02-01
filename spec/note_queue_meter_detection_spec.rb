@@ -74,6 +74,7 @@ describe MusicIR::NoteQueue do
           vector = $meter_vectors[key]
           $log.info "\tTrying to detect meter for: #{key}" if $log
           @nq = vector[:note_queue]
+          @nq.analyze_harmony! if @nq.none?{ |n| n.is_a?(MusicIR::Rest) }
           if @nq.detect_meter
             if @nq.meter.val == vector[:meter].val
               if @nq.first.analysis[:beat_position].to_hash.inspect == vector[:first_beat_position].to_hash.inspect
