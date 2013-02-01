@@ -19,7 +19,6 @@ end
 max_feature = samples.map {|sample| sample.keys.max}.max
 problem = RubyLinear::Problem.new(labels, samples, 1.0, max_feature)
 model = RubyLinear::Model.new(problem, :solver => RubyLinear::L1R_L2LOSS_SVC, :weights=>{1 => 2.9})
-puts "WARNING: still weighting class 1 by 2.9..."
 
 tp = 0
 tn = 0
@@ -43,6 +42,7 @@ fn = 0
   end
 end
 
+puts "WARNING: still weighting class 1 by 2.9..."
 puts "tp: #{tp}"
 puts "tn: #{tn}"
 puts "fp: #{fp}"

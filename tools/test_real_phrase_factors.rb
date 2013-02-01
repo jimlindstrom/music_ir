@@ -5,9 +5,6 @@ require 'music_ir'
 $LOAD_PATH << 'spec/vectors'
 require 'meter_vectors'
 
-$LOAD_PATH << 'tools'
-require 'real_phrase_factors'
-
 class Array
   def mean
     self.inject(:+).to_f / self.length
@@ -44,43 +41,52 @@ def preprocess_note_queues
   end
 end
 
-def mean_abs_t_score_for_factor(factor_lambda)
-  abs_t_values = []
-  $phrasing_vectors.each do |song_name, vector|
-    nq = vector[:note_queue]
-    if nq.none?{ |note| note.is_a? MusicIR::Rest }
-      boundary_scores    = []
-      nonboundary_scores = []
-
-      vector[:phrase_boundaries].each do |phrase|
-        boundary_scores << factor_score = factor_lambda.call(nq, phrase[:start_idx], phrase[:end_idx])
+def abs_t_score_for_factor(rows, col_idx)
+  phrase_scores    = []
+  nonphrase_scores = []
+  rows.each do |row|
+    if row[col_idx]
+      if row[0] == 1
+        phrase_scores << row[col_idx]
+      else
+        nonphrase_scores << row[col_idx]
       end
-
-      (10*vector[:phrase_boundaries].length).times do
-        start_idx = (0..(nq.length-1)).to_a.sample
-        end_idx = (start_idx..(nq.length-1)).to_a.sample
-        if !vector[:phrase_boundaries].include?({:start_idx=>start_idx, :end_idx=>end_idx})
-          nonboundary_scores << factor_score = factor_lambda.call(nq, start_idx, end_idx)
-        end
-      end
-
-      boundary_scores    = boundary_scores.select{    |x| x } # ignore nils
-      nonboundary_scores = nonboundary_scores.select{ |x| x } # ignore nils
-      
-      cur_t = t_statistic(boundary_scores, nonboundary_scores)
-      abs_t_values << cur_t.abs if cur_t.finite?
     end
   end
-  abs_t_values.mean
+  t_statistic(phrase_scores, nonphrase_scores).abs
 end
 
-preprocess_note_queues
-$scoring_lambdas.each_with_index do |x,i|
-  $scoring_lambdas[i][:mean_abs_t] = mean_abs_t_score_for_factor(x[:lambda])
-  #puts "#{$scoring_lambdas[i][:name]}: #{ $scoring_lambdas[i][:mean_abs_t]}"
+filename = ARGV[0]
+rows=eval(File.read(filename))
+rows = rows.map{ |row| row + [rand] } # add a random column, for a control.
+
+factor_names = [ "duration > 15",
+                 "duration > 10",
+                 "duration <  5",
+                 "duration <  3",
+                 "length > 11",
+                 "length >  9",
+                 "length <  4",
+                 "length <  3",
+                 "mean_similarity_to_other_phrases(phrase_list)",
+                 "num_similar_phrases(phrase_list)",
+                 "length_times_num_similar_phrases(phrase_list)",
+                 "length_times_mean_similarity_to_other_phrases(phrase_list)",
+                 "sum_of_interior_distances",
+                 "distance_after",
+                 "boundary_strength_of_end",
+                 "ratio_of_boundary_strength_of_end_vs_max",
+                 "ratio_of_boundary_strength_of_max_vs_min",
+                 "ratio_of_last_two_durations",
+                 "ratio_of_last_two_intervals",
+                 "random (control)" ]
+
+factors = factor_names.each_with_index.map do |factor_name, idx|
+  { :name => factor_name,
+    :abs_t => abs_t_score_for_factor(rows, 1+idx) }
 end
-$scoring_lambdas = $scoring_lambdas.sort{ |x,y| y[:mean_abs_t] <=> x[:mean_abs_t] }
-printf "%40s  %s\n", "Name", "Mean Abs. T Value"
-$scoring_lambdas.each do |x|
-  printf "%40s  %6.4f\n", x[:name], x[:mean_abs_t]
+factors.sort!{ |x,y| y[:abs_t] <=> x[:abs_t] }
+printf "%60s  %s\n", "Name", "Abs. T Value"
+factors.each do |factor|
+  printf "%60s  %6.4f\n", factor[:name], factor[:abs_t]
 end

@@ -52,6 +52,8 @@ describe MusicIR::NoteQueue do
         $log.info "\tTrying to detect phrases for: #{key}" if $log
         vector = $phrasing_vectors[key]
         nq = vector[:note_queue]
+        nq.analyze!         if nq.none?{ |n| n.is_a?(MusicIR::Rest) }
+        nq.analyze_harmony! if nq.none?{ |n| n.is_a?(MusicIR::Rest) }
         success = nq.detect_phrases
 
         actual_boundaries = vector[:phrase_boundaries].collect{ |p| p[:start_idx] }

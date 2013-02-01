@@ -14,15 +14,6 @@ describe MusicIR::PhraseBoundaryClassifier do
     it { should == 10 }
   end
 
-  describe ".factor" do
-    let(:note_idx) { 3 }
-    let(:factor_idx) { 1 }
-    subject { pbc.factor(nq, note_idx, factor_idx) }
-    it "should either be a fixnum, float or nil" do
-      [NilClass, Fixnum, Float].should include(subject.class)
-    end
-  end
-
   describe ".factors" do
     let(:note_idx) { 3 }
     subject { pbc.factors(nq, note_idx) }
@@ -45,8 +36,6 @@ describe MusicIR::PhraseBoundaryClassifier do
     let(:note_idx) { 3 }
     subject { pbc.end_of_phrase_boundary_strength(nq, note_idx) }
     it { should be_a Float }
-    it { should be >= 0.0 }
-    it { should be <= 1.0 }
   end
 
   describe ".end_of_phrase_indices" do

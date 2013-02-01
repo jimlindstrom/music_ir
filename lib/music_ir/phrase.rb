@@ -25,21 +25,16 @@ module MusicIR
       notes.map{ |note| note.duration.val }.inject(:+).to_f
     end
 
-    DIST_WEIGHT    =    3.0 # increasing this favors phrases that contain low-distance intervals
-    DUR_DEV_WEIGHT = -250.0 # decreasing this favors phrases that are closer to the mean duration
-
     def score(phrase_list)
-      total  = duration_penalty
-      total += length_penalty
-      total -= DIST_WEIGHT*sum_of_interior_distances
-      total += DIST_WEIGHT*distance_after
-      total += DUR_DEV_WEIGHT*phrase_list.phrase_duration_penalty_for(self)
-      total += mean_similarity_to_other_phrases(phrase_list)
-      total += num_similar_phrases(phrase_list)
-      total += length_times_num_similar_phrases(phrase_list)
-      total += length_times_mean_similarity_to_other_phrases(phrase_list)
-
-      return total
+      fs = classifier_factors(phrase_list)
+      sample = {}
+      fs.each_with_index do |x, idx|
+        if x
+          sample[idx] = x
+        end
+      end
+      winner, scores = @@model.predict_values(sample)
+      return scores[1]-scores[0]
     end
 
     def split_at_a_big_interval # FIXME: make it return two new ones.
@@ -58,7 +53,7 @@ module MusicIR
       return new_phrase
     end
 
-    def duration_penalty # penalizes really short or long phrases
+    def duration_penalty # FIXME: this isn't (shouldn't) be used any more.
       case 
         when duration >= 4 then    0
         when duration == 3 then -100
@@ -67,13 +62,45 @@ module MusicIR
       end
     end
 
-    def length_penalty # penalizes really short or long phrases
+    def duration_is_less_than_5?
+      (duration < 5) ? 1 : 0
+    end
+
+    def duration_is_less_than_3?
+      (duration < 3) ? 1 : 0
+    end
+
+    def duration_is_more_than_10?
+      (duration > 10) ? 1 : 0
+    end
+
+    def duration_is_more_than_15?
+      (duration > 15) ? 1 : 0
+    end
+
+    def length_penalty # FIXME: isn't (shouldn't) be used
       case 
         when  length >= 12                  then   -1*((length*4)**1.25)
         when (length >=  3 and length < 12) then    0
         when  length ==  2                  then -150
         when  length <=  1                  then -400
       end
+    end
+
+    def length_is_less_than_4?
+      (length < 4) ? 1 : 0
+    end
+
+    def length_is_less_than_3?
+      (length < 3) ? 1 : 0
+    end
+
+    def length_is_more_than_9?
+      (length > 9) ? 1 : 0
+    end
+
+    def length_is_more_than_11?
+      (duration > 11) ? 1 : 0
     end
 
     def similarities_to_other_phrases(phrase_list)
@@ -92,11 +119,11 @@ module MusicIR
     end
 
     def length_times_num_similar_phrases(phrase_list)
-      self.length * similarities_to_other_phrases(phrase_list).length
+      self.length * num_similar_phrases(phrase_list)
     end
 
     def length_times_mean_similarity_to_other_phrases(phrase_list)
-      self.length * similarities_to_other_phrases(phrase_list).length
+      self.length * mean_similarity_to_other_phrases(phrase_list)
     end
 
     def sum_of_interior_distances
@@ -150,8 +177,14 @@ module MusicIR
     end
 
     def classifier_factors(phrase_list)
-      [ self.duration_penalty,
-        self.length_penalty,
+      [ self.duration_is_more_than_15?,
+        self.duration_is_more_than_10?,
+        self.duration_is_less_than_5?,
+        self.duration_is_less_than_3?,
+        self.length_is_more_than_11?,
+        self.length_is_more_than_9?,
+        self.length_is_less_than_4?,
+        self.length_is_less_than_3?,
         self.mean_similarity_to_other_phrases(phrase_list),
         self.num_similar_phrases(phrase_list),
         self.length_times_num_similar_phrases(phrase_list),
@@ -164,6 +197,29 @@ module MusicIR
         self.ratio_of_last_two_durations,
         self.ratio_of_last_two_intervals ]
     end
+
+    def self.model
+      filename = "tools/phrases/phrase_classifier_matrix.txt"
+      return nil if !File.exists?(filename)
+      rows=eval(File.read(filename))
+      return nil if !rows
+      
+      labels  = rows.map{ |row| row[0]     }
+      x       = rows.map{ |row| row[1..-1] }
+      samples = x.map do |row|
+        sample = {}
+        row.each_with_index do |val, idx|
+          if val
+            sample[idx] = val
+          end
+        end
+        sample
+      end
+      max_feature = samples.map {|sample| sample.keys.max}.max
+      problem = RubyLinear::Problem.new(labels, samples, 1.0, max_feature)
+      RubyLinear::Model.new(problem, :solver => RubyLinear::L1R_L2LOSS_SVC, :weights=>{1 => 2.9})
+    end
+    @@model = self.model
 
   end
  
