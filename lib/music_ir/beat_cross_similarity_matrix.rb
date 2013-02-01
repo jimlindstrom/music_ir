@@ -74,7 +74,7 @@ module MusicIR
       (0..(@width-1)).each do |x|
         row = []
         (0..(@width-1)).each do |y|
-          row.push sprintf("%4.2f", @val[x][y])
+          row.push sprintf("%4.2f", @val[x][y] || 0.0) # FIXME: is it a bug that this can contain nil?
         end
         puts "\t\t" + row.join(", ")
       end
@@ -82,6 +82,45 @@ module MusicIR
       puts "\tarithmetic means:"
       means = (0..(@width-1)).map{ |i| arithmetic_mean_of_diag(i) }
       puts "\t\t" + means.map{ |x| sprintf("%5.3f", x) }.join(", ")
+    end
+
+    def print_to_html(filename)
+      f = File.open(filename, "w")
+
+      f.puts "<html>"
+      f.puts "<head>"
+      f.puts "<style>"
+      f.puts "table.grid { cellspacing: 0; cellpadding: 0; border: none; }"
+      f.puts "table.grid tr { cellspacing: 0; cellpadding: 0; border: none; }"
+      f.puts "table.grid td { border: none; width: 4px; height: 4px; }"
+      f.puts "</style>"
+      f.puts "</head>"
+      f.puts "<body>"
+      f.puts "<table class=\"grid\">"
+      (0..(@width-1)).each do |x|
+        f.puts "<tr>"
+        (0..(@width-1)).each do |y|
+          color_str = "000000"
+          if @val[x][y]
+            c = (255*@val[x][y]).floor
+            color_str = c.to_s(16) + (0.75*c).floor.to_s(16) + (0.50*c).floor.to_s(16)
+          end
+          f.print "<td bgcolor=\"##{color_str}\"></td>"
+        end
+        f.print "</tr>"
+      end
+      f.puts "</table>"
+
+      f.puts "<br/>"
+      f.puts "<br/>"
+      f.puts "arithmetic means:"
+      f.puts "<table>"
+      means = (0..(@width-1)).map{ |i| arithmetic_mean_of_diag(i) }
+      f.puts means.each_with_index.map{ |x,i| sprintf("<tr><td>%d</td><td>%5.3f</td></tr>", i, x) }.join("\n")
+      f.puts "<table>"
+
+      f.puts "</body></html>"
+      f.close
     end
 
   end
