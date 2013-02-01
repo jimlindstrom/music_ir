@@ -33,8 +33,9 @@ module MusicIR
           sample[idx] = x
         end
       end
+      raise ArgumentError.new("@@model is nil, can't use it to predict") if !@@model
       winner, scores = @@model.predict_values(sample)
-      return scores[1]-scores[0]
+      return (scores[1] || 0.0) - (scores[0] || 0.0)
     end
 
     def split_at_a_big_interval # FIXME: make it return two new ones.
@@ -215,12 +216,13 @@ module MusicIR
         end
         sample
       end
-      max_feature = samples.map {|sample| sample.keys.max}.max
-      problem = RubyLinear::Problem.new(labels, samples, 1.0, max_feature)
-      RubyLinear::Model.new(problem, :solver => RubyLinear::L1R_L2LOSS_SVC, :weights=>{1 => 2.9})
+      pa = LParameter.new
+      pa.solver_type = MCSVM_CS 
+      pa.eps = 0.1
+      problem = LProblem.new(labels, samples, 1.0)
+      LModel.new(problem, pa)
     end
     @@model = self.model
-
   end
  
 end

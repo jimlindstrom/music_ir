@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'ruby_linear'
+require 'linear'
 
 filename = ARGV[0]
 rows=eval(File.read(filename))
@@ -16,9 +16,12 @@ samples = x.map do |row|
   end
   sample
 end
-max_feature = samples.map {|sample| sample.keys.max}.max
-problem = RubyLinear::Problem.new(labels, samples, 1.0, max_feature)
-model = RubyLinear::Model.new(problem, :solver => RubyLinear::L1R_L2LOSS_SVC, :weights=>{1 => 2.9})
+
+pa = LParameter.new
+pa.solver_type = MCSVM_CS 
+pa.eps = 0.1
+problem = LProblem.new(labels, samples, 1.0)
+model = LModel.new(problem, pa)
 
 tp = 0
 tn = 0

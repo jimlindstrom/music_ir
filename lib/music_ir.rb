@@ -1,7 +1,7 @@
 require 'markov'
 require 'narray'
 require 'hmm'
-require 'ruby_linear'
+require 'linear'
 
 music_ir_files = ['beat.rb',
                   'beat_cross_similarity_matrix.rb',

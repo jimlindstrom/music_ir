@@ -18,9 +18,12 @@ module MusicIR
         end
         sample
       end
-      max_feature = samples.map {|sample| sample.keys.max}.max
-      problem = RubyLinear::Problem.new(labels, samples, 1.0, max_feature)
-      @model = RubyLinear::Model.new(problem, :solver => RubyLinear::L1R_L2LOSS_SVC)
+
+      pa = LParameter.new
+      pa.solver_type = MCSVM_CS 
+      pa.eps = 0.1
+      problem = LProblem.new(labels, samples, 1.0)
+      @model = LModel.new(problem, pa)
     end
 
     @@instance = PhraseBoundaryClassifier.new
@@ -54,6 +57,7 @@ module MusicIR
           sample[idx] = x
         end
       end
+      raise RuntimeError.new("@model is nil. Can't predict") if !@model
       @model.predict(sample) == 1
     end
 
@@ -65,8 +69,10 @@ module MusicIR
           sample[idx] = x
         end
       end
+      raise RuntimeError.new("@model is nil. Can't predict") if !@model
       winner, scores = @model.predict_values(sample)
-      return scores[1]-scores[0]
+      #raise RuntimeError.new("scores are bogus: #{scores.inspect}") if !scores || !scores[0] || !scores[1]
+      return (scores[1] || 0.0) - (scores[0] || 0.0)
     end
 
     def end_of_phrase_indices(note_queue)
