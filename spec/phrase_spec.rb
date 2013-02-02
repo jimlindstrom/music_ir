@@ -31,10 +31,10 @@ describe MusicIR::Phrase do
     let(:p) { MusicIR::Phrase.new(nq, idx1, idx2) }
     subject { p.notes }
 
-    it { should be_a MusicIR::NoteQueue([]) }
+    it { should be_a MusicIR::NoteQueue }
     it "should return the notes included in this phrase" do
-      expected_notes = nq[idx1..idx2].collect{ |n| [ n.pitch.val, n.duration.val ] }
-      subject.collect{ |n| [ n.pitch.val, n.duration.val ] }.should == expected_notes
+      expected_notes = nq[idx1..idx2].map{ |n| [ n.pitch.val, n.duration.val ] }
+      subject.map{ |n| [ n.pitch.val, n.duration.val ] }.should == expected_notes
     end
   end
 
