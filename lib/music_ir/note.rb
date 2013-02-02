@@ -16,31 +16,31 @@ module MusicIR
       pitch_similarity = 0.00
       sum_of_weights   = 0.00
       if abs_pitch_similarity_to(n)
-        pitch_similarity += 0.35*abs_pitch_similarity_to(n) 
-        sum_of_weights   += 0.35
+        pitch_similarity += $pitch_similarity_weights[0]*abs_pitch_similarity_to(n) 
+        sum_of_weights   += $pitch_similarity_weights[0]
       end
       if interval_similarity_to(n)
-        pitch_similarity += 0.25*interval_similarity_to(n) 
-        sum_of_weights   += 0.25
+        pitch_similarity += $pitch_similarity_weights[1]*interval_similarity_to(n) 
+        sum_of_weights   += $pitch_similarity_weights[1]
       end
       if diatonic_pitch_similarity_to(n)
-        pitch_similarity += 0.15*diatonic_pitch_similarity_to(n) 
-        sum_of_weights   += 0.15
+        pitch_similarity += $pitch_similarity_weights[2]*diatonic_pitch_similarity_to(n) 
+        sum_of_weights   += $pitch_similarity_weights[2]
       end
       if chord_similarity_to(n)
-        pitch_similarity += 0.15*chord_similarity_to(n) 
-        sum_of_weights   += 0.15
+        pitch_similarity += $pitch_similarity_weights[3]*chord_similarity_to(n) 
+        sum_of_weights   += $pitch_similarity_weights[3]
       end
       if key_similarity_to(n)
-        pitch_similarity += 0.10*key_similarity_to(n) 
-        sum_of_weights   += 0.10
+        pitch_similarity += $pitch_similarity_weights[4]*key_similarity_to(n) 
+        sum_of_weights   += $pitch_similarity_weights[4]
       end
       pitch_similarity = pitch_similarity / sum_of_weights
 
-      duration_similarity = 1.00*duration_similarity_to(n)
+      duration_similarity = duration_similarity_to(n)
 
-      note_similarity = 0.60*pitch_similarity + 
-                        0.40*duration_similarity
+      note_similarity = $note_similarity_weights[0]*pitch_similarity + 
+                        $note_similarity_weights[1]*duration_similarity
       return note_similarity
     end
 

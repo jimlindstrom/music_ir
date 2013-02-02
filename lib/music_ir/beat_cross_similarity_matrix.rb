@@ -84,26 +84,20 @@ module MusicIR
       puts "\t\t" + means.map{ |x| sprintf("%5.3f", x) }.join(", ")
     end
 
-    def print_to_html(filename)
-      f = File.open(filename, "w")
-
-      f.puts "<html>"
-      f.puts "<head>"
-      f.puts "<style>"
-      f.puts "table.grid { cellspacing: 0; cellpadding: 0; border: none; }"
-      f.puts "table.grid tr { cellspacing: 0; cellpadding: 0; border: none; }"
-      f.puts "table.grid td { border: none; width: 4px; height: 4px; }"
-      f.puts "</style>"
-      f.puts "</head>"
-      f.puts "<body>"
+    def print_to_html(f)
+      f.puts "Beat Similarity Matrix:<br />"
       f.puts "<table class=\"grid\">"
       (0..(@width-1)).each do |x|
         f.puts "<tr>"
         (0..(@width-1)).each do |y|
           color_str = "000000"
           if @val[x][y]
-            c = (255*@val[x][y]).floor
-            color_str = c.to_s(16) + (0.75*c).floor.to_s(16) + (0.50*c).floor.to_s(16)
+
+            r = [[((@val[x][y]*3.0) - 0.0), 0.0].max, 1.0].min
+            g = [[((@val[x][y]*3.0) - 1.0), 0.0].max, 1.0].min
+            b = [[((@val[x][y]*3.0) - 2.0), 0.0].max, 1.0].min
+
+            color_str = ("%02x" % (255.0*r).floor) + ("%02x" % (255.0*g).floor) + ("%02x" % (255.0*b).floor)
           end
           f.print "<td bgcolor=\"##{color_str}\"></td>"
         end
@@ -113,14 +107,21 @@ module MusicIR
 
       f.puts "<br/>"
       f.puts "<br/>"
-      f.puts "arithmetic means:"
+      f.puts "Arithmetic means:"
       f.puts "<table>"
-      means = (0..(@width-1)).map{ |i| arithmetic_mean_of_diag(i) }
-      f.puts means.each_with_index.map{ |x,i| sprintf("<tr><td>%d</td><td>%5.3f</td></tr>", i, x) }.join("\n")
-      f.puts "<table>"
-
-      f.puts "</body></html>"
-      f.close
+      f.puts "<tr>"
+      f.puts "<td style=\"width:  50px;\">Diag</td>"
+      f.puts "<td style=\"width:  80px; text-align: right;\">Ari. Mean</td>"
+      f.puts "<td style=\"width: 100px; text-align: right;\">Geo. Mean</td>"
+      f.puts "</tr>"
+      0.upto(@width-1) do |diag|
+        f.puts "<tr>"
+        f.puts "<td>#{diag}</td>"
+        f.puts "<td style=\"width:  80px; text-align: right;\">#{sprintf("%+.4f", arithmetic_mean_of_diag(diag))}</td>"
+        f.puts "<td style=\"width: 100px; text-align: right;\">#{sprintf("%.2e",  geometric_mean_of_diag( diag))}</td>"
+        f.puts "</tr>"
+      end
+      f.puts "</table>"
     end
 
   end
