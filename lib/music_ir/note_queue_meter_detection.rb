@@ -2,10 +2,17 @@
 
 # assumes it is included in NoteQueue
 module CanDetectMeter
-  attr_accessor :tempo, :meter
 
-  def detect_meter
-    bsm = MusicIR::BeatSimilarityMatrix.new(self.beat_array)
+  def meter
+    return @meter if @meter
+    detect_meter!
+    @mete 
+  end
+
+private
+
+  def detect_meter!
+    bsm = MusicIR::BeatSimilarityMatrix.new(self.to_beat_array)
     bsm_diags = (1..20).map{ |i| { :subbeat=>i, :score=>bsm.geometric_mean_of_diag(i) } }.sort{ |x,y| y[:score] <=> x[:score] }
     $log.info "\t\tbsm_diags: #{bsm_diags.inspect.gsub(/, {/, "\n\t\t            {")}" if $log
 
@@ -16,8 +23,6 @@ module CanDetectMeter
 
     return true
   end
-
-private
 
   def detect_meter_period(bsm, bsm_diags)
     confidence = bsm_diags[0][:score].to_f / bsm_diags[1][:score]
@@ -101,7 +106,7 @@ private
     $log.info "\ttrying to detect initial beat position:" if $log
 
     correl_len = @meter.subbeats_per_measure
-    ba = self.beat_array
+    ba = self.to_beat_array
     correls = [0.0]*correl_len
     (0..(ba.length-1)).each do |i|
       if !(cur_beat = ba[i]).nil?
@@ -134,7 +139,7 @@ private
 
   def set_beat_position_of_all_notes(initial_beat_position)
     beat_pos = initial_beat_position
-    self.each do |n|
+    @notes.each do |n|
       n.analysis[:beat_position] = beat_pos.dup
 
       beat_pos.subbeat += n.duration.val

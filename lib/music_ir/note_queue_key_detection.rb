@@ -19,6 +19,8 @@ module CanDetectKey
   @@hmm = nil
 
   def analyze_harmony!
+    return if @have_analyzed_harmony
+
     max_likelihood = nil
     likeliest_key_pitch_class = nil
     likeliest_chords = nil
@@ -34,7 +36,7 @@ module CanDetectKey
       inferred_chord_indices = inferred_chord_strings.map{ |chord_str| CHORD_STRINGS.index(chord_str) }
       inferred_chords        = inferred_chord_indices.map{ |chord_idx| CHORDS[chord_idx] }
 
-      likelihood = hmm.likelihood(pitch_class_strings) * 10**(self.length)
+      likelihood = hmm.likelihood(pitch_class_strings) * 10**(@notes.length)
       chord_prior_probs = inferred_chord_indices.map{ |chord_idx| hmm.pi[chord_idx] }
       likelihood *= chord_prior_probs.inject(:*)
 
@@ -54,10 +56,12 @@ module CanDetectKey
     minor_tonic_count = tonic_chords.select{ |chord| chord.mode==:minor }.length
     key_chord_mode = (major_tonic_count >= minor_tonic_count) ? :major : :minor
 
-    self.each_with_index do |note, idx|
+    @notes.each_with_index do |note, idx|
       note.analysis[:key]   = MusicIR::Chord.new(likeliest_key_pitch_class, key_chord_mode)
       note.analysis[:chord] = likeliest_chords[idx]
     end
+
+    @have_analyzed_harmony = true # so that we don't do it again
   end
    
 private
@@ -75,7 +79,7 @@ private
   end
  
   def transposed_pitch_classes(steps_down)
-    self.map do |note| 
+    @notes.map do |note| 
       MusicIR::PitchClass.new( ( MusicIR::PitchClass.from_pitch(note.pitch).val+12-steps_down) % 12 ) # transpose down by a # of steps
     end
   end

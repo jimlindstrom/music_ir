@@ -1,44 +1,40 @@
-# midi_event_queue_spec.rb
-
 require 'spec_helper'
 
 describe MusicIR::NoteQueue do
 
-  before(:each) do
-  end
-
-  describe ".detect_phrases" do
+  describe ".phrases" do
     before(:each) do
       @vector = $phrasing_vectors["Bring back my bonnie to me"]
       @nq = @vector[:note_queue]
     end
-    context "when the note queue is clearly phrased", :known_fail=>true do
-      it "returns true" do
-        @nq.detect_phrases.should == true
+    context "when the note queue is clearly phrased" do
+      it "returns a PhraseList" do
+        @nq.phrases.should be_a MusicIR::PhraseList
       end
     end
     context "when the note queue is ambiguously phrased" do
-      it "returns false" do
-        @nq = @nq[0..0] # something so short it's guaranteed to be metrically ambiguous
-        @nq.detect_phrases.should == false
+      it "returns nil" do
+        @nq = MusicIR::NoteQueue.new(@nq[0..0]) # something so short it's guaranteed to be ambiguously phrased
+        @nq.phrases.should be_nil
       end
     end
     context "when the note queue contains rests" do
       before(:each) do
-        @nq = MusicIR::NoteQueue.new
+        notes = []
+        notes << MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
+        notes << MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(4))
+        notes << MusicIR::Rest.new(                       MusicIR::Duration.new(3))
+        notes << MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
+        @nq = MusicIR::NoteQueue.new(notes)
         @nq.tempo = 100
-        @nq.push MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
-        @nq.push MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(4))
-        @nq.push MusicIR::Rest.new(                       MusicIR::Duration.new(3))
-        @nq.push MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
       end
-      it "returns false" do
-        @nq.detect_phrases.should == false
+      it "returns nil" do # meaning .. not handled yet.
+        @nq.phrases.should be_nil
       end
     end
   end
 
-  describe ".detect_phrases", :high_level_stats=>true do
+  describe ".phrases" do
     before(:all) do
       @false_pos    = 0
       @false_neg    = 0
@@ -52,25 +48,26 @@ describe MusicIR::NoteQueue do
         $log.info "\tTrying to detect phrases for: #{key}" if $log
         vector = $phrasing_vectors[key]
         nq = vector[:note_queue]
-        nq.analyze!         if nq.none?{ |n| n.is_a?(MusicIR::Rest) }
         nq.analyze_harmony! if nq.none?{ |n| n.is_a?(MusicIR::Rest) }
-        success = nq.detect_phrases
 
         actual_boundaries = vector[:phrase_boundaries].collect{ |p| p[:start_idx] }
-        calced_boundaries = nq.phrases.collect{ |p| p.start_idx } if  success
-        calced_boundaries = []                                    if !success
+        calced_boundaries = if nq.phrases
+          nq.phrases.map{ |p| p.start_idx }
+        else
+          [ ]
+        end
 
         @false_pos    += (calced_boundaries - actual_boundaries).length # switch to using actual boundaries
         @false_neg    += (actual_boundaries - calced_boundaries).length
         @true_pos     += (actual_boundaries & calced_boundaries).length
         @exp_true_pos += actual_boundaries.length
 
-        if success and (calced_boundaries == actual_boundaries)
+        if nq.phrases and (calced_boundaries == actual_boundaries)
           @successes.push "#{key}"
-        elsif success and (calced_boundaries != actual_boundaries)
+        elsif nq.phrases and (calced_boundaries != actual_boundaries)
           @failures.push "%-34s" % "\"#{key}\"" +
                          "calculated: #{calced_boundaries.inspect} != expected: #{actual_boundaries.inspect}"
-        else # !success
+        else # !nq.phrases
           @failures.push "%-34s" % "\"#{key}\"" +
                          "failed"
         end

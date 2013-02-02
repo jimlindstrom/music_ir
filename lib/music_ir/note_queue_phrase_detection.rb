@@ -1,23 +1,27 @@
 module CanDetectPhrases
-  attr_accessor :phrases
 
-  MAX_ATTEMPTS = 3
+  def phrases
+    return @phrases if @phrases
+    detect_phrases!
+    @phrases
+  end
 
-  def detect_phrases
-    return false if self.length < 2 # we need >= 2 per group, and at least one group
-    return false if self.map{|x| x.class}.include?(MusicIR::Rest) # FIXME:For now, we can't deal with these.
+private
 
-    analyze!
+  MAX_ATTEMPTS = 2#3
+
+  def detect_phrases!
+    return false if @notes.length < 2 # we need >= 2 per group, and at least one group
+    return false if @notes.map{|x| x.class}.include?(MusicIR::Rest) # FIXME:For now, we can't deal with these.
+
     @phrases = MusicIR::PhraseList.initial(self)
     attempts = MAX_ATTEMPTS.times.collect { new_phrase_detection_attempt }
 
     return true
   end
 
-private
-
-  MAX_RETRIES = 35
-  MAX_ITERS   = 50
+  MAX_RETRIES = 3#35
+  MAX_ITERS   = 12#50
 
   def new_phrase_detection_attempt
     best_phrases = MusicIR::PhraseList.initial(self)

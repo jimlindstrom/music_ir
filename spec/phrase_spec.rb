@@ -31,7 +31,7 @@ describe MusicIR::Phrase do
     let(:p) { MusicIR::Phrase.new(nq, idx1, idx2) }
     subject { p.notes }
 
-    it { should be_a MusicIR::NoteQueue }
+    it { should be_a MusicIR::NoteQueue([]) }
     it "should return the notes included in this phrase" do
       expected_notes = nq[idx1..idx2].collect{ |n| [ n.pitch.val, n.duration.val ] }
       subject.collect{ |n| [ n.pitch.val, n.duration.val ] }.should == expected_notes
@@ -61,8 +61,6 @@ describe MusicIR::Phrase do
 
   describe ".score" do
     context "given an analyzed notequeue" do
-      before { nq.analyze! } # FIXME: and ... analyze_meter, and analyze_harmony?
-   
       let(:phrase_list) { MusicIR::PhraseList.new(nq) }
 
       before do
@@ -77,36 +75,32 @@ describe MusicIR::Phrase do
   end
 
   describe ".split_at_a_big_interval" do
-    context "after running .analyze!" do
-      before { nq.analyze! }
-
-      context "for phrases with 0 or 1 notes" do
-        let(:one_note_phrase) { MusicIR::Phrase.new(nq, idx1=2, idx2=2) }
-        it "should raise an error" do
-          expect { one_note_phrase.split_at_a_big_interval }.to raise_error
-        end
+    context "for phrases with 0 or 1 notes" do
+      let(:one_note_phrase) { MusicIR::Phrase.new(nq, idx1=2, idx2=2) }
+      it "should raise an error" do
+        expect { one_note_phrase.split_at_a_big_interval }.to raise_error
       end
-      context "for phrases with 2 or more notes" do
-        let(:two_note_phrase) { MusicIR::Phrase.new(nq, idx1=2, idx2=3) }
-        let(:six_note_phrase) { MusicIR::Phrase.new(nq, idx1=2, idx2=7) }
+    end
+    context "for phrases with 2 or more notes" do
+      let(:two_note_phrase) { MusicIR::Phrase.new(nq, idx1=2, idx2=3) }
+      let(:six_note_phrase) { MusicIR::Phrase.new(nq, idx1=2, idx2=7) }
 
-        it "should return a new phrase" do
-          two_note_phrase.split_at_a_big_interval.should be_an_instance_of MusicIR::Phrase
-        end
-        it "should decrement its own ending index by at least 1" do
-          old_end_idx = two_note_phrase.end_idx
-          two_note_phrase.split_at_a_big_interval
-          two_note_phrase.end_idx.should be < old_end_idx
-        end
-        it "should return a new phrase starting right after the newly-split current phrase" do
-          p2 = six_note_phrase.split_at_a_big_interval
-          six_note_phrase.end_idx.should == (p2.start_idx-1)
-        end
-        it "should return a new phrase ending at the end of the original phrase" do
-          old_end_idx = six_note_phrase.end_idx
-          p2 = six_note_phrase.split_at_a_big_interval
-          p2.end_idx.should == old_end_idx
-        end
+      it "should return a new phrase" do
+        two_note_phrase.split_at_a_big_interval.should be_an_instance_of MusicIR::Phrase
+      end
+      it "should decrement its own ending index by at least 1" do
+        old_end_idx = two_note_phrase.end_idx
+        two_note_phrase.split_at_a_big_interval
+        two_note_phrase.end_idx.should be < old_end_idx
+      end
+      it "should return a new phrase starting right after the newly-split current phrase" do
+        p2 = six_note_phrase.split_at_a_big_interval
+        six_note_phrase.end_idx.should == (p2.start_idx-1)
+      end
+      it "should return a new phrase ending at the end of the original phrase" do
+        old_end_idx = six_note_phrase.end_idx
+        p2 = six_note_phrase.split_at_a_big_interval
+        p2.end_idx.should == old_end_idx
       end
     end
   end

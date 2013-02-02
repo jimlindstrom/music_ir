@@ -9,7 +9,7 @@ describe MusicIR::NoteQueue do
 
   describe ".tempo" do
     it "can be read and written" do
-      nq = MusicIR::NoteQueue.new
+      nq = MusicIR::NoteQueue.new([])
       nq.tempo = 250
       nq.tempo.should == 250
     end
@@ -18,7 +18,7 @@ describe MusicIR::NoteQueue do
   describe ".to_event_queue" do
     context "if tempo has been set" do
       before(:each) do
-        @nq = MusicIR::NoteQueue.new
+        @nq = MusicIR::NoteQueue.new([])
         @nq.tempo = 100
       end
       it "returns a EventQueue" do
@@ -26,10 +26,13 @@ describe MusicIR::NoteQueue do
       end
       context "if it contains notes, and possibly rests" do
         before(:each) do
-          @nq.push MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
-          @nq.push MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(4))
-          @nq.push MusicIR::Rest.new(                     MusicIR::Duration.new(3))
-          @nq.push MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
+          notes = []
+          notes << MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
+          notes << MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(4))
+          notes << MusicIR::Rest.new(                       MusicIR::Duration.new(3))
+          notes << MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
+          @nq = MusicIR::NoteQueue.new(notes)
+          @nq.tempo = 100
           @eq = @nq.to_event_queue
         end
         it "converts each note (not rest) into a note_on / note_off pair" do
@@ -54,20 +57,11 @@ describe MusicIR::NoteQueue do
     end
     context "if tempo has not been set" do
       it "raises an error" do
-        @nq = MusicIR::NoteQueue.new
+        @nq = MusicIR::NoteQueue.new([])
         expect { @nq.to_event_queue }.to raise_error(ArgumentError)
       end
     end
   end
-
-#  describe "tag_with_notes_left" do
-#    it "adds analysis to each note indicating how many notes follow it" do
-#      vector = $meter_vectors["Bring back my bonnie to me"]
-#      nq = vector[:note_queue]
-#      nq.tag_with_notes_left
-#      nq.map { |n| n.analysis[:notes_left] }[-6..-1].should == [ 5, 4, 3, 2, 1, 0 ]
-#    end
-#  end
 
   describe ".from_event_queue" do
     before (:all) do
@@ -123,6 +117,31 @@ describe MusicIR::NoteQueue do
       end
     end
   end
+
+  describe ".to_beat_array" do
+    before(:each) do
+      notes = []
+      notes << MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
+      notes << MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(4))
+      notes << MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
+      notes << MusicIR::Rest.new(                       MusicIR::Duration.new(2))
+      @nq = MusicIR::NoteQueue.new(notes)
+      @nq.tempo = 100
+    end
+    it "returns an array containing one element per beat" do
+      @nq.to_beat_array.length.should == (1+4+2+2)
+    end
+    it "returns an array containing Beats where there are note onsets" do
+      @nq.to_beat_array[0+1+4].should be_an_instance_of MusicIR::Beat
+    end
+    it "returns an array containing Beats where there are rest onsets" do
+      @nq.to_beat_array[0+1+4+2].should be_an_instance_of MusicIR::Beat
+    end
+    it "returns an array containing nils where there aren't note onsets" do
+      @nq.to_beat_array[0+2].nil?.should be_true
+    end
+  end
+
 
   describe ".ratio_of_cur_and_prev_duration" do
     pending

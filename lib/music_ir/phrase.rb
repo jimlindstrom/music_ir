@@ -3,7 +3,7 @@ module MusicIR
     attr_reader :start_idx, :end_idx
 
     def initialize(note_queue, start_idx, end_idx)
-      raise ArgumentError.new("note_queue cannot be nil") if note_queue.nil?
+      raise ArgumentError.new("note_queue cannot be nil") if !note_queue
       raise ArgumentError.new("start_idx must be >= 0") if start_idx < 0
       raise ArgumentError.new("end_idx must be >= start_idx") if start_idx > end_idx
       raise ArgumentError.new("end_idx must be < length") if end_idx >= note_queue.length
@@ -14,7 +14,7 @@ module MusicIR
     end
 
     def notes
-      @note_queue[@start_idx..@end_idx]
+      NoteQueue.new(@note_queue[@start_idx..@end_idx])
     end
 
     def length
@@ -22,7 +22,7 @@ module MusicIR
     end
 
     def duration
-      notes.map{ |note| note.duration.val }.inject(:+).to_f
+      @note_queue[@start_idx..@end_idx].map{ |note| note.duration.val }.inject(:+).to_f
     end
 
     def score(phrase_list)

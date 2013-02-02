@@ -5,7 +5,6 @@ require 'spec_helper'
 shared_examples "scores correctly" do |vector, incorrect_phrases|
   it "scores correctly" do
     nq = vector[:note_queue]
-    nq.analyze!
     nq.analyze_harmony!
     correct_phrase_list = MusicIR::PhraseList.new(nq)
     vector[:phrase_boundaries].each do |p|
@@ -66,7 +65,6 @@ describe MusicIR::PhraseList do
     it "returns a float" do
       @vector = $phrasing_vectors["Bring back my bonnie to me"]
       @nq = @vector[:note_queue]
-      @nq.analyze!
       @nq.analyze_harmony!
       pl = MusicIR::PhraseList.initial(@nq)
       pl.score.should be_an_instance_of Float

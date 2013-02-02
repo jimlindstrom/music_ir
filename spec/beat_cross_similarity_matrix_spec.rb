@@ -7,21 +7,21 @@ describe MusicIR::BeatCrossSimilarityMatrix do
     before(:each) do
       vector = $phrasing_vectors["Bring back my bonnie to me"]
       nq = vector[:note_queue]
-      @beat_array1 = nq.beat_array
+      @beat_array1 = nq.to_beat_array
   
       vector = $phrasing_vectors["This train is bound for glory"]
       nq = vector[:note_queue]
-      @beat_array2 = nq.beat_array
+      @beat_array2 = nq.to_beat_array
     end
     it "should take two beat arrays and return a cross similarity matrix" do
       MusicIR::BeatCrossSimilarityMatrix.new(@beat_array1, @beat_array2).should be_an_instance_of MusicIR::BeatCrossSimilarityMatrix
     end
     it "should take two beat arrays (possibly containing rests) and return a cross similarity matrix" do
-      nq = MusicIR::NoteQueue.new
-      nq.push MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
-      nq.push MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(2))
-      nq.push MusicIR::Rest.new(                     MusicIR::Duration.new(1))
-      @beat_array1 = nq.beat_array
+      notes = []
+      notes << MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
+      notes << MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(2))
+      notes << MusicIR::Rest.new(                     MusicIR::Duration.new(1))
+      @beat_array1 = MusicIR::NoteQueue.new(notes).to_beat_array
 
       MusicIR::BeatCrossSimilarityMatrix.new(@beat_array1, @beat_array1).should be_an_instance_of MusicIR::BeatCrossSimilarityMatrix
     end
@@ -46,9 +46,9 @@ describe MusicIR::BeatCrossSimilarityMatrix do
       end
 
       it "should return >= 20% higher similarity for real phrases than for fake phrases (this train 1)" do
-        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).beat_array
-        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[1].notes).beat_array
-        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[0].notes).beat_array
+        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).to_beat_array
+        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[1].notes).to_beat_array
+        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[0].notes).to_beat_array
   
         m12 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array1, beat_array2)
         m23 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array2, beat_array3)
@@ -60,9 +60,9 @@ describe MusicIR::BeatCrossSimilarityMatrix do
       end
 
       it "should return >= 20% higher similarity for real phrases than for fake phrases (this train 2)" do
-        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).beat_array
-        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[3].notes).beat_array
-        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[1].notes).beat_array
+        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).to_beat_array
+        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[3].notes).to_beat_array
+        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[1].notes).to_beat_array
   
         m12 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array1, beat_array2)
         m23 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array2, beat_array3)
@@ -74,9 +74,9 @@ describe MusicIR::BeatCrossSimilarityMatrix do
       end
 
       it "should return >= 20% higher similarity for real phrases than for fake phrases (this train 3)" do
-        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[1].notes).beat_array
-        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[3].notes).beat_array
-        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[2].notes).beat_array
+        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[1].notes).to_beat_array
+        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[3].notes).to_beat_array
+        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[2].notes).to_beat_array
   
         m12 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array1, beat_array2)
         m23 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array2, beat_array3)
@@ -105,9 +105,9 @@ describe MusicIR::BeatCrossSimilarityMatrix do
       end
 
       it "should return >= 20% higher similarity for real phrases than for fake phrases (somewhere 1)" do
-        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).beat_array
-        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[2].notes).beat_array
-        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[0].notes).beat_array
+        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).to_beat_array
+        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[2].notes).to_beat_array
+        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[0].notes).to_beat_array
   
         m12 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array1, beat_array2)
         m23 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array2, beat_array3)
@@ -119,9 +119,9 @@ describe MusicIR::BeatCrossSimilarityMatrix do
       end
 
       it "should return >= 20% higher similarity for real phrases than for fake phrases (somewhere 2)" do
-        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).beat_array
-        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[3].notes).beat_array
-        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[1].notes).beat_array
+        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).to_beat_array
+        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[3].notes).to_beat_array
+        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[1].notes).to_beat_array
   
         m12 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array1, beat_array2)
         m23 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array2, beat_array3)
@@ -133,9 +133,9 @@ describe MusicIR::BeatCrossSimilarityMatrix do
       end
 
       it "should return >= 20% higher similarity for real phrases than for fake phrases (somewhere 3)" do
-        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).beat_array #   7- 9
-        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[2].notes).beat_array #  10-16
-        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[2].notes).beat_array #  12-21
+        beat_array1 = MusicIR::NoteQueue.new(  @correct_pl[0].notes).to_beat_array #   7- 9
+        beat_array2 = MusicIR::NoteQueue.new(  @correct_pl[2].notes).to_beat_array #  10-16
+        beat_array3 = MusicIR::NoteQueue.new(@incorrect_pl[2].notes).to_beat_array #  12-21
   
         m12 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array1, beat_array2)
         m23 = MusicIR::BeatCrossSimilarityMatrix.new(beat_array2, beat_array3)
