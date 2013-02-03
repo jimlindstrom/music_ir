@@ -142,6 +142,30 @@ describe MusicIR::NoteQueue do
     end
   end
 
+  describe ".to_phenomenal_accent_array" do
+    before(:each) do
+      notes = []
+      notes << MusicIR::Note.new(MusicIR::Pitch.new(1), MusicIR::Duration.new(1))
+      notes << MusicIR::Note.new(MusicIR::Pitch.new(2), MusicIR::Duration.new(4))
+      notes << MusicIR::Note.new(MusicIR::Pitch.new(3), MusicIR::Duration.new(2))
+      notes << MusicIR::Rest.new(                       MusicIR::Duration.new(2))
+      @nq = MusicIR::NoteQueue.new(notes)
+      @nq.tempo = 100
+    end
+    it "returns an array containing one Fixnum per beat" do
+      @nq.to_phenomenal_accent_array.length.should == (1+4+2+2)
+    end
+    it "returns an array containing 1.0 where there are note onsets" do
+      @nq.to_phenomenal_accent_array[0+1+4].should be_within(0.1).of(1.0)
+    end
+    it "returns an array containing 0.0 where there are rest onsets" do
+      @nq.to_phenomenal_accent_array[0+1+4+2].should be_within(0.1).of(0.0)
+    end
+    it "returns an array containing 0.0 where there aren't onsets" do
+      @nq.to_phenomenal_accent_array[0+2].should be_within(0.1).of(0.0)
+    end
+  end
+
 
   describe ".ratio_of_cur_and_prev_duration" do
     pending

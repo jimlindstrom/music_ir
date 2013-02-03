@@ -60,7 +60,7 @@
 - The same article http://www.cs.tut.fi/sgn/arg/klap/sapmeter.pdf says that 
   several meter detection algorithms used simple onset autocorrelation to detect
   subbeat and beat, but that measure detection was measured by looking for
-  chord change or certain drum sounds. 
+  chord change or certain drum sounds.
 
 - It's remarkable to me that both meter detection and phrase detection are 
   relying heavily on BSMs, yet don't share information, and rely on totally 

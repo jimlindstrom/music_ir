@@ -77,7 +77,7 @@ module MusicIR
   
       return eq
     end
-  
+
     def to_beat_array
       return @to_beat_array if @to_beat_array  # memoized
       @to_beat_array = []
@@ -95,6 +95,16 @@ module MusicIR
         prev = note
       end
       return @to_beat_array
+    end
+
+    def to_phenomenal_accent_array
+      return @to_phenomenal_array if @to_phenomenal_array  # memoized
+      @to_phenomenal_array = []
+      @notes.each do |note|
+        @to_phenomenal_array << 1.0
+        @to_phenomenal_array += [0.0]*(note.duration.val-1)
+      end
+      return @to_phenomenal_array
     end
 
   private

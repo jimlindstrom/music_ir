@@ -6,7 +6,7 @@ module MusicIR
     attr_reader :val
 
     def initialize(new_val)
-      raise ArgumentError if new_val < 0 or new_val > 11
+      raise ArgumentError.new("newval=#{new_val || "nil"}, which is bogus") if !new_val || new_val < 0 || new_val > 11
       @val = new_val
     end
   
