@@ -12,6 +12,7 @@ module CanDetectMeter
 private
 
   def detect_meter!
+    return false if !$meter_autocorrel_lags || !$meter_autocorrel_signature || !$meter_prior_probability
     @meter = detect_time_signature
 
     bsm = MusicIR::BeatSimilarityMatrix.new(self.to_beat_array)
