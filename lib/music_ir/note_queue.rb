@@ -101,8 +101,12 @@ module MusicIR
       return @to_phenomenal_array if @to_phenomenal_array  # memoized
       @to_phenomenal_array = []
       @notes.each do |note|
-        @to_phenomenal_array << 1.0
-        @to_phenomenal_array += [0.0]*(note.duration.val-1)
+        if note.is_a?(Note)
+          @to_phenomenal_array << 1.0
+          @to_phenomenal_array += [0.0]*(note.duration.val-1)
+        else # if note.is_a?(Rest)
+          @to_phenomenal_array += [0.0]*(note.duration.val)
+        end
       end
       return @to_phenomenal_array
     end
