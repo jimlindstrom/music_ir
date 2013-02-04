@@ -141,7 +141,7 @@ module MusicIR
         phrase_beats = MusicIR::NoteQueue.new(phrase.notes).to_beat_array
         (self-[phrase]).each do |other_phrase|
           other_phrase_beats = MusicIR::NoteQueue.new(other_phrase.notes).to_beat_array
-          matrix = BeatCrossSimilarityMatrix.new(phrase_beats, other_phrase_beats)
+          matrix = BeatCrossSimilarityMatrix.new(phrase_beats, other_phrase_beats) # FIXME: this only needs constructed once for the notequeue
           phrase_similarities <<  matrix.max_arithmetic_mean_of_diag(penalize_for_overhang=true)
         end
       end
