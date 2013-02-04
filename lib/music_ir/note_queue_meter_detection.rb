@@ -27,6 +27,17 @@ private
     return true
   end
 
+  # This article http://www.cs.tut.fi/sgn/arg/klap/sapmeter.pdf makes the point
+  # that it's note-to-note "phenomenal accent" that is important. That should be
+  # what we're looking at in detecting meter. Sure, we can then go look back at
+  # time lags for periodicity. But in meter (vs. phrase) detection, what we're
+  # looking for isn't time-lagged similarity, but coincidence (at a time lag) of
+  # phenomenal accent.
+  #
+  # The same article http://www.cs.tut.fi/sgn/arg/klap/sapmeter.pdf says that
+  # several meter detection algorithms used simple onset autocorrelation to detect
+  # subbeat and beat, but that measure detection was measured by looking for
+  # chord change or certain drum sounds.
   def detect_time_signature
     accents = self.to_phenomenal_accent_array
     ac = accents.autocorrelation($meter_autocorrel_lags)

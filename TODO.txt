@@ -2,15 +2,23 @@
 # General
 ################################################################################
 
-- Consider moving to https://github.com/tomz/liblinear-ruby-swig. May crash less
-  than https://github.com/fcheung/rubylinear
+################################################################################
+# Key/Chord detection
+################################################################################
 
-- It might be cleaner to not represent Rests explicitly, but rather to let notes
-  have an IOI (which would include the rest's duration) as well as a duration.
+- Now that I've got some annotated examples (see $meter_vectors2), I should add
+  a test to measure the performance of key detection, to help make sure it 
+  doesn't regress.
 
 ################################################################################
 # Phrase detection
 ################################################################################
+
+- Check out tools/test_autocorrel_phrase_detection.rb. I was trying to do meter
+  detection. In following an idea I saw in a paper, I ended up making a fairly
+  bad meter detection algorithm because it kept showing an 
+  autocorrelation+entropy spike at 2-4 measures, which I assume is a phrase
+  boundary.
 
 - It still surprises the hell out of of me that this isn't TRIVIAL. "My Bonnie 
   lies over the ocean" is practically verbatim AAAA BA'BA'.  Why isn't that a
@@ -45,27 +53,3 @@
   that a phrase candidate with mediocre similarity to every other phrase is
   treated just as high as a phrase with above-average similarity to exactly
   one other phrase.
- 
-################################################################################
-# Meter detection
-################################################################################
-
-- This article http://www.cs.tut.fi/sgn/arg/klap/sapmeter.pdf makes the point 
-  that it's note-to-note "phenomenal accent" that is important. That should be
-  what we're looking at in detecting meter. Sure, we can then go look back at 
-  time lags for periodicity. But in meter (vs. phrase) detection, what we're 
-  looking for isn't time-lagged similarity, but coincidence (at a time lag) of
-  phenomenal accent.
-
-- The same article http://www.cs.tut.fi/sgn/arg/klap/sapmeter.pdf says that 
-  several meter detection algorithms used simple onset autocorrelation to detect
-  subbeat and beat, but that measure detection was measured by looking for
-  chord change or certain drum sounds.
-
-- It's remarkable to me that both meter detection and phrase detection are 
-  relying heavily on BSMs, yet don't share information, and rely on totally 
-  separate algorithms. They both depend on structure, and both seem likely to 
-  benefit from a more sophisticated analysis of the BSM.
-	- what do squares mean?
-	- what do think vert/horiz stripes mean?
-
