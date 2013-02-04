@@ -32,8 +32,8 @@ module MusicIR
         note_dur = (duration         / q_ret[:q]).round
         rest_dur = ((ioi - duration) / q_ret[:q]).round
 
-        raise RuntimeError.new("bogus ioi: #{note_dur}") if (note_dur < 0) || (note_dur >= Duration.num_values)
-        raise RuntimeError.new("bogus pitch: #{pitch}")  if (pitch    < 0) || (pitch    >= Pitch.num_values   )
+        raise RuntimeError.new("bogus ioi: #{note_dur}") if (note_dur <= 0) || (note_dur >= Duration.num_values)
+        raise RuntimeError.new("bogus pitch: #{pitch}")  if (pitch     < 0) || (pitch    >= Pitch.num_values   )
         notes << Note.new(Pitch.new(pitch), Duration.new(note_dur))
 
         if rest_dur > 0
