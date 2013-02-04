@@ -6,7 +6,8 @@ module MusicIR
       return if !File.exists?(FILENAME)
 
       rows=eval(File.read(FILENAME))
-      
+      return if !rows
+
       labels  = rows.map{ |row| row[0]     }
       x       = rows.map{ |row| row[1..-1] }
       samples = x.map do |row|

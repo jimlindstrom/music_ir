@@ -37,8 +37,6 @@ def preprocess_note_queues
   $phrasing_vectors.each do |song_name, vector|
     nq = vector[:note_queue]
     if nq.none?{ |note| note.is_a? MusicIR::Rest }
-      nq.detect_meter
-      #nq.analyze! # I can't remember whether this is necessary, or just what it does...
       nq.analyze_harmony!
     end
   end
