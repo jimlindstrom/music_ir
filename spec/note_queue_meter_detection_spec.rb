@@ -12,16 +12,6 @@ describe MusicIR::NoteQueue do
         @nq.meter.should be_a MusicIR::Meter
       end
     end
-    context "when the note queue is metrically ambiguous" do
-      before(:each) do
-        vector = $meter_vectors["Bring back my bonnie to me"]
-        nq = vector[:note_queue]
-        @nq = MusicIR::NoteQueue.new(nq[0..0]) # something so short it's guaranteed to be metrically ambiguous
-      end
-      it "returns nil" do
-        @nq.meter.should be_nil
-      end
-    end
     context "when the note queue is metrically clear and contains notes and rests" do
       before(:each) do
         notes = []
