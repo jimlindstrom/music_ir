@@ -11,9 +11,14 @@ RSpec::Core::RakeTask.new(:spec) do |t|
   t.pattern = 'spec/*_spec.rb'
 end
 
+desc "Regenerate the parameters for the prior distribution of meters and their autocorrelation signatures"
+task :regenerate_meter_estimator do
+  sh "./tools/generate_meter_detection_stats.rb > lib/music_ir/meter_detection_stats.rb"
+end
+
 desc "Regenerate the parameters for the hidden markov model in the key estimator"
 task :regenerate_key_estimator do
-  sh "./tools/create_hmm_matrices_for_key_estimation.rb tools/chord_stats/pop_genre__chord_stats.txt > lib/key_estimator_chord_stats.rb"
+  sh "./tools/create_hmm_matrices_for_key_estimation.rb tools/chord_stats/pop_genre__chord_stats.txt > lib/music_ir/key_estimator_chord_stats.rb"
 end
 
 desc "Regenerate the parameters for the linear classifier for phrase boundary detection"

@@ -23,10 +23,20 @@ module MusicIR
       @subbeats_per_beat = subbeats_per_beat
     end
   
-    def self.random
+    def self.random # FIXME: this should begin taking advantage of prior probabilities
       return Meter.new( COMMON_BEATS_PER_MEASURE.sample,
                         COMMON_BEAT_UNITS.sample,
                         COMMON_SUBBEATS_PER_BEAT.sample)
+    end
+
+    def self.each
+      ALLOWED_BEATS_PER_MEASURE.each do |beats_per_measure|
+        ALLOWED_BEAT_UNITS.each do |beat_unit|
+          ALLOWED_SUBBEATS_PER_BEAT.each do |subbeats_per_beat|
+            yield beats_per_measure, beat_unit, subbeats_per_beat
+          end
+        end
+      end
     end
   
     def self.num_values
@@ -54,6 +64,10 @@ module MusicIR
       { :beats_per_measure => @beats_per_measure, 
         :beat_unit         => @beat_unit, 
         :subbeats_per_beat => @subbeats_per_beat }
+    end
+
+    def to_s
+      "#{@beats_per_measure}/#{@beat_unit} (#{@subbeats_per_beat}x)"
     end
   
   end
