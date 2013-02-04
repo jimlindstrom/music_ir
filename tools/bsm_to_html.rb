@@ -8,10 +8,10 @@ require 'meter_vectors'
 $phrasing_vectors.each do |song_name, vector|
   nq = vector[:note_queue]
   if nq.none?{ |note| note.is_a? MusicIR::Rest }
+    nq.meter
     nq.analyze_harmony!
-    nq.detect_meter
 
-    beat_array = nq.beat_array
+    beat_array = nq.to_beat_array
     bsm = MusicIR::BeatCrossSimilarityMatrix.new(beat_array, beat_array)
 
     filename = "/tmp/" + song_name.gsub(/[^A-Za-z]/, '_') + ".html"
