@@ -63,7 +63,7 @@ def valid_meter_vectors
   valid_vectors = { }
 
   note_queue = nil
-  $new_meter_vectors2.each do |song_name, vector|
+  $meter_vectors2.each do |song_name, vector|
     begin
       note_queue = MusicIR::NoteQueue.from_event_queue(MusicIR::EventQueue.new(vector[:events]))
     rescue
@@ -71,21 +71,28 @@ def valid_meter_vectors
     end
   
     if !note_queue
-      next
-    elsif note_queue.any?{ |x| x.is_a? MusicIR::Rest }
+      STDERR.puts "SKIPPING \"#{song_name}\": couldn't convert from event queue to note queue"
       next
     elsif !MusicIR::Meter::ALLOWED_BEATS_PER_MEASURE.include?(vector[:time_sig_numerator])
+      STDERR.puts "SKIPPING \"#{song_name}\": has non-allowed beats/meas: #{vector[:time_sig_numerator]}"
       next
     elsif !MusicIR::Meter::ALLOWED_BEAT_UNITS.include?(vector[:time_sig_denominator])
+      STDERR.puts "SKIPPING \"#{song_name}\": has non-allowed beat unit: #{vector[:time_sig_denominator]}"
       next
-    elsif ![256, 512, 1024].include?(note_queue.tempo.round)
+    elsif ![24, 48, 96, 256, 512, 1024].include?(note_queue.tempo.round)
+      STDERR.puts "SKIPPING \"#{song_name}\": has unusual note_queue.tempo: #{note_queue.tempo}"
       next
     end
   
     expected_subbeats_per_beat = case note_queue.tempo.round
+      # Bach chorales
       when  256 then 4
       when  512 then 2
       when 1024 then 1
+      # Misc songs
+      when   24 then 4
+      when   48 then 2
+      when   96 then 1
     end
 
     valid_vectors[song_name] = vector
@@ -93,7 +100,7 @@ def valid_meter_vectors
     valid_vectors[song_name][:expected_meter] = MusicIR::Meter.new(vector[:time_sig_numerator], vector[:time_sig_denominator], expected_subbeats_per_beat)
   end
 
-  STDERR.puts "there are #{$new_meter_vectors2.keys.length} vectors"
+  STDERR.puts "there are #{$meter_vectors2.keys.length} vectors"
   STDERR.puts "we're using #{valid_vectors.length} of them"
 
   valid_vectors
